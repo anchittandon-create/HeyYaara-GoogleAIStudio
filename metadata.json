@@ -1,0 +1,5 @@
+{
+  "name": "Hey Yaara",
+  "description": "A voice-first AI companion designed to reduce loneliness for elderly users through warm conversation, music, and games.",
+  "requestFramePermissions": ["microphone"]
+}
