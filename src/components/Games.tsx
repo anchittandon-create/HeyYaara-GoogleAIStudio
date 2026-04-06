@@ -24,6 +24,39 @@ const GAMES: Game[] = [
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  const [board, setBoard] = useState<(string | null)[]>(Array(9).fill(null));
+  const [isXNext, setIsXNext] = useState(true);
+
+  const calculateWinner = (squares: (string | null)[]) => {
+    const lines = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6],
+    ];
+    for (let i = 0; i < lines.length; i++) {
+      const [a, b, c] = lines[i];
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+        return squares[a];
+      }
+    }
+    return null;
+  };
+
+  const winner = calculateWinner(board);
+  const isDraw = !winner && board.every(square => square !== null);
+
+  const handleSquareClick = (i: number) => {
+    if (winner || board[i]) return;
+    const newBoard = board.slice();
+    newBoard[i] = isXNext ? 'X' : 'O';
+    setBoard(newBoard);
+    setIsXNext(!isXNext);
+  };
+
+  const resetGame = () => {
+    setBoard(Array(9).fill(null));
+    setIsXNext(true);
+  };
 
   return (
     <div className="flex flex-col h-full bg-green-50 overflow-y-auto">
@@ -80,22 +113,53 @@ export default function Games() {
                 </button>
               </div>
               
-              <div className="flex-1 min-h-[400px] flex flex-col items-center justify-center p-12 bg-gray-50">
-                <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mb-8">
-                  <Play className="w-16 h-16 text-gray-400 fill-current ml-2" />
-                </div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-4">Game Loading...</h3>
-                <p className="text-xl text-gray-500 text-center max-w-md">
-                  Yaara is setting up the {selectedGame.title} board for you. 
-                  Taiyaar ho jaiye!
-                </p>
-                
-                <button className={cn(
-                  "mt-12 px-12 py-6 rounded-full text-white text-3xl font-bold shadow-xl hover:scale-105 active:scale-95 transition-all",
-                  selectedGame.color
-                )}>
-                  Start Game
-                </button>
+              <div className="flex-1 min-h-[500px] flex flex-col items-center justify-center p-12 bg-gray-50">
+                {selectedGame.id === 'ttt' ? (
+                  <div className="flex flex-col items-center gap-8">
+                    <div className="text-3xl font-bold text-gray-800 mb-4">
+                      {winner ? `Winner: ${winner}!` : isDraw ? "It's a Draw!" : `Next Player: ${isXNext ? 'X' : 'O'}`}
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 bg-gray-200 p-4 rounded-3xl shadow-inner">
+                      {board.map((square, i) => (
+                        <button
+                          key={i}
+                          onClick={() => handleSquareClick(i)}
+                          className={cn(
+                            "w-24 h-24 md:w-32 md:h-32 bg-white rounded-2xl flex items-center justify-center text-6xl font-bold shadow-md transition-all active:scale-95",
+                            square === 'X' ? "text-blue-600" : "text-red-600",
+                            !square && !winner && "hover:bg-gray-50"
+                          )}
+                        >
+                          {square}
+                        </button>
+                      ))}
+                    </div>
+                    <button 
+                      onClick={resetGame}
+                      className={cn("mt-8 px-12 py-6 rounded-full text-white text-3xl font-bold shadow-xl transition-all", selectedGame.color)}
+                    >
+                      Reset Game
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mb-8">
+                      <Play className="w-16 h-16 text-gray-400 fill-current ml-2" />
+                    </div>
+                    <h3 className="text-3xl font-bold text-gray-900 mb-4">Game Loading...</h3>
+                    <p className="text-xl text-gray-500 text-center max-w-md">
+                      Yaara is setting up the {selectedGame.title} board for you. 
+                      Taiyaar ho jaiye!
+                    </p>
+                    
+                    <button className={cn(
+                      "mt-12 px-12 py-6 rounded-full text-white text-3xl font-bold shadow-xl hover:scale-105 active:scale-95 transition-all",
+                      selectedGame.color
+                    )}>
+                      Start Game
+                    </button>
+                  </>
+                )}
               </div>
 
               <div className="p-8 border-t border-gray-100 flex items-center justify-center gap-12">

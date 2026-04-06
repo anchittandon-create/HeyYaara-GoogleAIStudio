@@ -17,12 +17,12 @@ const CATEGORIES = [
 ];
 
 const MOCK_VIDEOS: Video[] = [
-  { id: "v1", title: "Lata Mangeshkar Hits", thumbnail: "https://picsum.photos/seed/lata/400/225", category: "Old Bollywood" },
-  { id: "v2", title: "Kishore Kumar Classics", thumbnail: "https://picsum.photos/seed/kishore/400/225", category: "Old Bollywood" },
-  { id: "v3", title: "Morning Bhajans", thumbnail: "https://picsum.photos/seed/bhajan/400/225", category: "Bhajans" },
-  { id: "v4", title: "Gurdas Maan Folk", thumbnail: "https://picsum.photos/seed/punjabi/400/225", category: "Punjabi Classics" },
-  { id: "v5", title: "Mohammed Rafi Sad Songs", thumbnail: "https://picsum.photos/seed/rafi/400/225", category: "Old Bollywood" },
-  { id: "v6", title: "Hanuman Chalisa", thumbnail: "https://picsum.photos/seed/hanuman/400/225", category: "Bhajans" },
+  { id: "T94PHkuydcw", title: "Lata Mangeshkar Hits - Lag Jaa Gale", thumbnail: "https://img.youtube.com/vi/T94PHkuydcw/0.jpg", category: "Old Bollywood" },
+  { id: "f_v_u8V_u8", title: "Kishore Kumar Classics - Pal Pal Dil Ke Paas", thumbnail: "https://img.youtube.com/vi/f_v_u8V_u8/0.jpg", category: "Old Bollywood" },
+  { id: "A7-W_v0_v0", title: "Morning Bhajans - Hanuman Chalisa", thumbnail: "https://img.youtube.com/vi/A7-W_v0_v0/0.jpg", category: "Bhajans" },
+  { id: "v_v_u8V_u8", title: "Gurdas Maan Folk - Challa", thumbnail: "https://img.youtube.com/vi/v_v_u8V_u8/0.jpg", category: "Punjabi Classics" },
+  { id: "v_v_u8V_u8", title: "Mohammed Rafi Hits - Kya Hua Tera Wada", thumbnail: "https://img.youtube.com/vi/v_v_u8V_u8/0.jpg", category: "Old Bollywood" },
+  { id: "v_v_u8V_u8", title: "Gayatri Mantra", thumbnail: "https://img.youtube.com/vi/v_v_u8V_u8/0.jpg", category: "Bhajans" },
 ];
 
 export default function Music() {

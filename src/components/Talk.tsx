@@ -35,9 +35,12 @@ export default function Talk({ onEnd }: TalkProps) {
           config: {
             responseModalities: [Modality.AUDIO],
             speechConfig: {
-              voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
+              voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
             },
-            systemInstruction: "You are Yaara, a warm and friendly AI companion for elderly users. Speak slowly and clearly in a mix of Hindi, English, and Punjabi (Hinglish). Keep responses short (1-2 sentences). Be supportive, patient, and engaging. Never repeat what the user said. If there is silence, provide a gentle prompt or reassurance.",
+            tools: [{ googleSearch: {} }],
+            inputAudioTranscription: {},
+            outputAudioTranscription: {},
+            systemInstruction: "You are Yaara, a warm and friendly AI companion for elderly users. Speak slowly and clearly in a mix of Hindi, English, and Punjabi (Hinglish). Keep responses short (1-2 sentences). Be supportive, patient, and engaging. Never repeat what the user said. If there is silence, provide a gentle prompt or reassurance. Use Google Search to provide accurate real-time information when asked about news, weather, or current events.",
           },
           callbacks: {
             onopen: () => {
@@ -60,9 +63,14 @@ export default function Talk({ onEnd }: TalkProps) {
               }
 
               // Handle transcription
-              const transcript = message.serverContent?.modelTurn?.parts?.[0]?.text;
-              if (transcript) {
-                addMessage(transcript, 'YAARA');
+              const modelTranscript = message.serverContent?.modelTurn?.parts?.[0]?.text;
+              if (modelTranscript) {
+                addMessage(modelTranscript, 'YAARA');
+              }
+
+              const userTranscript = (message.serverContent as any)?.userTurn?.parts?.[0]?.text;
+              if (userTranscript) {
+                addMessage(userTranscript, 'USER');
               }
 
               // Handle interruption
