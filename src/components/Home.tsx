@@ -25,10 +25,10 @@ export default function Home({ onNavigate }: HomeProps) {
         className="text-center space-y-4"
       >
         <h1 className="text-6xl md:text-8xl font-bold text-orange-900 tracking-tight">
-          Namaste 👋
+          Namaste, aapki Yaara.
         </h1>
         <p className="text-3xl md:text-4xl text-orange-700 font-medium">
-          Aaj kaise feel kar rahe ho?
+          Yeh aapka soft space hai — boliye, suniye, ya phir gaana suniye. Sab kuch simple, warm aur aapke liye tailored.
         </p>
       </motion.div>
 
