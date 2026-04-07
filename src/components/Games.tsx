@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Gamepad2, Brain, X, Play, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-import { Game } from '../types';
+import { Game, AppState } from '../types';
 
 const GAMES: Game[] = [
   // Fun Games
@@ -21,7 +21,7 @@ const GAMES: Game[] = [
   { id: "minesweeper", title: "Minesweeper", icon: "💣", color: "bg-gray-600", category: "BRAIN", description: "Clear the field", url: "https://www.google.com/logos/fnbx/minesweeper/minesweeper.html" },
 ];
 
-export default function Games({ initialGameId }: { initialGameId?: string }) {
+export default function Games({ initialGameId, onNavigate }: { initialGameId?: string, onNavigate?: (state: AppState) => void }) {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
 
   // Handle initial game selection from voice
@@ -35,20 +35,26 @@ export default function Games({ initialGameId }: { initialGameId?: string }) {
   return (
     <div className="flex flex-col h-full bg-[#F5F9FF] overflow-hidden">
       {/* Header - Compact */}
-      <div className="px-8 py-4 md:py-6 bg-white border-b-2 border-blue-50 flex items-center justify-between z-10 shadow-sm">
-        <div className="flex items-center gap-4 pl-24 md:pl-32">
-          <div className="p-3 bg-green-500 rounded-2xl text-white">
+      <div className="px-6 py-4 bg-white border-b-2 border-blue-50 flex items-center gap-4 z-10 shadow-sm">
+        <button 
+          onClick={() => onNavigate?.('HOME')}
+          className="p-3 hover:bg-gray-100 rounded-full transition-all active:scale-90"
+        >
+          <ChevronLeft className="w-8 h-8 text-gray-600" />
+        </button>
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-green-500 rounded-2xl text-white shadow-md">
             <Gamepad2 className="w-8 h-8" />
           </div>
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Games</h1>
-            <p className="text-lg text-gray-500">Masti aur Brain Exercise!</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">Games</h1>
+            <p className="text-base text-gray-500">Masti aur Brain Exercise!</p>
           </div>
         </div>
       </div>
 
       {/* Game Sections - Compact to avoid vertical scroll */}
-      <div className="flex-1 flex flex-col justify-center p-4 md:p-8 gap-8 overflow-y-auto scrollbar-hide">
+      <div className="flex-1 flex flex-col p-4 md:p-8 gap-8 overflow-y-auto scrollbar-hide">
         <GameSection 
           title="Fun Games" 
           icon={<Star className="w-8 h-8 text-yellow-500 fill-current" />}

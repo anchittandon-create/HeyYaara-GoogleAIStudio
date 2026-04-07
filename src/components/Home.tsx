@@ -17,18 +17,18 @@ export default function Home({ onNavigate }: HomeProps) {
   ];
 
   return (
-    <div className="flex flex-col items-center justify-between min-h-full p-8 md:p-12 lg:p-16 bg-gradient-to-b from-orange-50 to-white">
+    <div className="flex flex-col items-center h-full p-6 md:p-10 bg-gradient-to-b from-orange-50 to-white overflow-y-auto scrollbar-hide gap-10">
       {/* Greeting Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-4"
+        className="text-center space-y-2 max-w-4xl"
       >
-        <h1 className="text-6xl md:text-8xl font-bold text-orange-900 tracking-tight">
+        <h1 className="text-5xl md:text-7xl font-bold text-orange-900 tracking-tight">
           Namaste, aapki Yaara.
         </h1>
-        <p className="text-3xl md:text-4xl text-orange-700 font-medium">
-          Yeh aapka soft space hai — boliye, suniye, ya phir gaana suniye. Sab kuch simple, warm aur aapke liye tailored.
+        <p className="text-2xl md:text-3xl text-orange-700 font-medium leading-relaxed">
+          Yeh aapka soft space hai — boliye, suniye, ya phir game kheliye.
         </p>
       </motion.div>
 
@@ -37,35 +37,35 @@ export default function Home({ onNavigate }: HomeProps) {
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 0.2 }}
-        className="flex flex-col items-center gap-8"
+        className="flex flex-col items-center gap-6"
       >
         <VoiceOrb 
           state="IDLE" 
           onClick={() => onNavigate('TALK')}
-          className="w-64 h-64 md:w-80 md:h-80"
+          className="w-56 h-56 md:w-72 md:h-72"
         />
-        <div className="text-center space-y-2">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900">Talk to Yaara</h2>
-          <p className="text-2xl md:text-3xl text-gray-500 italic">"Bas bolo… main sun raha hoon"</p>
+        <div className="text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Talk to Yaara</h2>
+          <p className="text-xl md:text-2xl text-gray-500 italic">"Bas bolo… main sun raha hoon"</p>
         </div>
       </motion.div>
 
       {/* Quick Actions Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl mt-12">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-5xl">
         <ActionButton 
-          icon={<Mic className="w-10 h-10" />} 
+          icon={<Mic className="w-8 h-8" />} 
           label="Talk" 
           color="bg-blue-500"
           onClick={() => onNavigate('TALK')}
         />
         <ActionButton 
-          icon={<Music className="w-10 h-10" />} 
+          icon={<Music className="w-8 h-8" />} 
           label="Music" 
           color="bg-pink-500"
           onClick={() => onNavigate('MUSIC')}
         />
         <ActionButton 
-          icon={<Gamepad2 className="w-10 h-10" />} 
+          icon={<Gamepad2 className="w-8 h-8" />} 
           label="Games" 
           color="bg-green-500"
           onClick={() => onNavigate('GAMES')}
@@ -73,16 +73,16 @@ export default function Home({ onNavigate }: HomeProps) {
       </div>
 
       {/* Suggestions Section */}
-      <div className="w-full max-w-4xl mt-12 space-y-4">
-        <h3 className="text-2xl font-semibold text-gray-400 uppercase tracking-widest text-center">Suggestions</h3>
-        <div className="flex flex-wrap justify-center gap-4">
+      <div className="w-full max-w-4xl space-y-4 pb-10">
+        <h3 className="text-xl font-semibold text-gray-400 uppercase tracking-widest text-center">Suggestions</h3>
+        <div className="flex flex-wrap justify-center gap-3">
           {suggestions.map((s, i) => (
             <motion.button
               key={i}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={s.action}
-              className="px-8 py-4 bg-white border-2 border-orange-100 rounded-full text-2xl font-medium text-orange-800 shadow-sm hover:shadow-md transition-all"
+              className="px-6 py-3 bg-white border-2 border-orange-100 rounded-full text-xl font-medium text-orange-800 shadow-sm hover:shadow-md transition-all"
             >
               {s.text}
             </motion.button>

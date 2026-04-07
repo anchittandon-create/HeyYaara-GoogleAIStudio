@@ -372,9 +372,9 @@ export default function Talk({ onEnd, onNavigate }: TalkProps) {
       </div>
 
       {/* Controls Footer */}
-      <div className="p-8 md:p-12 flex items-center justify-center gap-8 md:gap-16 bg-black/40 backdrop-blur-xl">
+      <div className="p-4 md:p-6 flex items-center justify-center gap-6 md:gap-10 bg-black/40 backdrop-blur-xl">
         <ControlButton 
-          icon={isMuted ? <MicOff className="w-10 h-10" /> : <Mic className="w-10 h-10" />}
+          icon={isMuted ? <MicOff className="w-8 h-8" /> : <Mic className="w-8 h-8" />}
           label={isMuted ? "Unmute" : "Mute"}
           color={isMuted ? "bg-red-500" : "bg-white/10"}
           onClick={() => setIsMuted(!isMuted)}
@@ -382,13 +382,13 @@ export default function Talk({ onEnd, onNavigate }: TalkProps) {
         
         <button 
           onClick={onEnd}
-          className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-red-600 flex items-center justify-center shadow-2xl hover:bg-red-700 transition-all hover:scale-110 active:scale-95"
+          className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-red-600 flex items-center justify-center shadow-2xl hover:bg-red-700 transition-all hover:scale-110 active:scale-95"
         >
-          <PhoneOff className="w-12 h-12 md:w-16 md:h-16 text-white" />
+          <PhoneOff className="w-10 h-10 md:w-12 md:h-12 text-white" />
         </button>
 
         <ControlButton 
-          icon={isSpeakerOn ? <Volume2 className="w-10 h-10" /> : <VolumeX className="w-10 h-10" />}
+          icon={isSpeakerOn ? <Volume2 className="w-8 h-8" /> : <VolumeX className="w-8 h-8" />}
           label={isSpeakerOn ? "Speaker" : "Muted"}
           color={isSpeakerOn ? "bg-white/10" : "bg-red-500"}
           onClick={() => setIsSpeakerOn(!isSpeakerOn)}

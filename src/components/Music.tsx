@@ -2,13 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Play, X, Music as MusicIcon, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-import { YouTubeVideo } from '../types';
+import { YouTubeVideo, AppState } from '../types';
 import { searchVideos, getCategoryVideos } from '../services/youtubeService';
 import { useQuery } from '@tanstack/react-query';
 
 const CATEGORIES = ["Old Bollywood Songs", "Bhajans", "Punjabi Songs"];
 
-export default function Music({ initialQuery }: { initialQuery?: string }) {
+export default function Music({ initialQuery, onNavigate }: { initialQuery?: string, onNavigate?: (state: AppState) => void }) {
   const [searchQuery, setSearchQuery] = useState(initialQuery || "");
   const [debouncedSearch, setDebouncedSearch] = useState(initialQuery || "");
   const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
@@ -37,35 +37,43 @@ export default function Music({ initialQuery }: { initialQuery?: string }) {
   });
 
   return (
-    <div className="flex flex-col h-full bg-[#FFF9F5] overflow-y-auto">
+    <div className="flex flex-col h-full bg-[#FFF9F5] overflow-hidden">
       {/* Header & Search */}
-      <div className="p-8 md:p-12 bg-white shadow-md sticky top-0 z-20 space-y-8">
-        <div className="flex items-center gap-6 pl-24 md:pl-32">
-          <div className="p-5 bg-orange-500 rounded-3xl text-white shadow-lg">
-            <MusicIcon className="w-12 h-12" />
+      <div className="p-4 md:p-6 bg-white shadow-sm sticky top-0 z-20 space-y-4">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => onNavigate?.('HOME')}
+            className="p-3 hover:bg-gray-100 rounded-full transition-all active:scale-90"
+          >
+            <ChevronLeft className="w-8 h-8 text-gray-600" />
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-orange-500 rounded-2xl text-white shadow-md">
+              <MusicIcon className="w-8 h-8" />
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">Music</h1>
           </div>
-          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 tracking-tight">Music</h1>
         </div>
 
-        <div className="relative max-w-6xl mx-auto group">
-          <Search className="absolute left-8 top-1/2 -translate-y-1/2 w-12 h-12 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
+        <div className="relative max-w-4xl group">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-8 h-8 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
           <input 
             type="text"
-            placeholder="Search songs (Hindi, English, Punjabi)"
+            placeholder="Search songs (Hindi, Punjabi...)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-24 pr-12 py-10 text-4xl rounded-[40px] border-4 border-orange-50 focus:border-orange-500 outline-none transition-all shadow-xl bg-orange-50/30 placeholder:text-gray-400"
+            className="w-full pl-16 pr-10 py-5 text-2xl rounded-2xl border-2 border-orange-50 focus:border-orange-500 outline-none transition-all shadow-sm bg-orange-50/30 placeholder:text-gray-400"
           />
           {isSearching && (
-            <div className="absolute right-8 top-1/2 -translate-y-1/2">
-              <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
+            <div className="absolute right-6 top-1/2 -translate-y-1/2">
+              <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
             </div>
           )}
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 p-8 md:p-12 space-y-20 pb-24">
+      <div className="flex-1 p-4 md:p-8 space-y-12 overflow-y-auto scrollbar-hide pb-12">
         {debouncedSearch.length > 2 ? (
           <section className="space-y-10">
             <div className="flex items-center justify-between px-4">

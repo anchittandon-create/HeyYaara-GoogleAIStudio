@@ -29,9 +29,9 @@ export default function App() {
       case 'TALK':
         return <Talk onEnd={() => setCurrentState('HOME')} onNavigate={handleNavigate} />;
       case 'MUSIC':
-        return <Music initialQuery={extraData?.query} />;
+        return <Music initialQuery={extraData?.query} onNavigate={handleNavigate} />;
       case 'GAMES':
-        return <Games initialGameId={extraData?.gameId} />;
+        return <Games initialGameId={extraData?.gameId} onNavigate={handleNavigate} />;
       default:
         return <Home onNavigate={handleNavigate} />;
     }
@@ -57,11 +57,11 @@ export default function App() {
 
       {/* Navigation Bar - Only show when not in TALK mode to keep focus */}
       {currentState !== 'TALK' && (
-        <nav className="h-32 md:h-40 bg-white border-t-4 border-gray-100 flex items-stretch justify-around px-4 md:px-12 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-50">
+        <nav className="h-24 md:h-28 bg-white border-t-2 border-gray-100 flex items-stretch justify-around px-4 md:px-12 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-50">
           <NavButton 
             active={currentState === 'HOME'} 
             onClick={() => setCurrentState('HOME')}
-            icon={<HomeIcon className="w-10 h-10 md:w-12 md:h-12" />}
+            icon={<HomeIcon className="w-8 h-8 md:w-9 md:h-9" />}
             label="Home"
             color="text-orange-600"
             bgColor="bg-orange-50"
@@ -69,7 +69,7 @@ export default function App() {
           <NavButton 
             active={currentState === 'TALK'} 
             onClick={() => setCurrentState('TALK')}
-            icon={<Mic className="w-10 h-10 md:w-12 md:h-12" />}
+            icon={<Mic className="w-8 h-8 md:w-9 md:h-9" />}
             label="Talk"
             color="text-blue-600"
             bgColor="bg-blue-50"
@@ -77,7 +77,7 @@ export default function App() {
           <NavButton 
             active={currentState === 'MUSIC'} 
             onClick={() => setCurrentState('MUSIC')}
-            icon={<MusicIcon className="w-10 h-10 md:w-12 md:h-12" />}
+            icon={<MusicIcon className="w-8 h-8 md:w-9 md:h-9" />}
             label="Music"
             color="text-pink-600"
             bgColor="bg-pink-50"
@@ -85,24 +85,12 @@ export default function App() {
           <NavButton 
             active={currentState === 'GAMES'} 
             onClick={() => setCurrentState('GAMES')}
-            icon={<Gamepad2 className="w-10 h-10 md:w-12 md:h-12" />}
+            icon={<Gamepad2 className="w-8 h-8 md:w-9 md:h-9" />}
             label="Games"
             color="text-green-600"
             bgColor="bg-green-50"
           />
         </nav>
-      )}
-
-      {/* Back Button for non-home screens (optional, but helpful) */}
-      {currentState !== 'HOME' && currentState !== 'TALK' && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          onClick={() => setCurrentState('HOME')}
-          className="fixed top-8 left-8 z-[60] p-6 bg-white/80 backdrop-blur-md border-2 border-gray-100 rounded-full shadow-xl text-gray-900 hover:bg-white transition-all active:scale-90"
-        >
-          <ChevronLeft className="w-10 h-10" />
-        </motion.button>
       )}
     </div>
   );
@@ -122,22 +110,22 @@ function NavButton({ active, onClick, icon, label, color, bgColor }: NavButtonPr
     <button 
       onClick={onClick}
       className={cn(
-        "flex-1 flex flex-col items-center justify-center gap-2 transition-all relative overflow-hidden",
+        "flex-1 flex flex-col items-center justify-center gap-1 transition-all relative overflow-hidden",
         active ? color : "text-gray-400"
       )}
     >
       {active && (
         <motion.div 
           layoutId="nav-bg"
-          className={cn("absolute inset-2 md:inset-4 rounded-3xl -z-10", bgColor)}
+          className={cn("absolute inset-1 md:inset-2 rounded-2xl -z-10", bgColor)}
         />
       )}
       {icon}
-      <span className="text-2xl md:text-3xl font-bold">{label}</span>
+      <span className="text-xl md:text-2xl font-bold">{label}</span>
       {active && (
         <motion.div 
           layoutId="nav-indicator"
-          className={cn("absolute bottom-0 left-1/4 right-1/4 h-2 rounded-t-full", color.replace('text-', 'bg-'))}
+          className={cn("absolute bottom-0 left-1/4 right-1/4 h-1.5 rounded-t-full", color.replace('text-', 'bg-'))}
         />
       )}
     </button>
