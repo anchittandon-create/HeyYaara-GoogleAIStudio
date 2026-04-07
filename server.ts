@@ -13,7 +13,11 @@ async function startServer() {
 
   // API Routes
   app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", message: "Server is running" });
+    res.json({ 
+      status: "ok", 
+      message: "Server is running",
+      geminiKeySet: !!process.env.GEMINI_API_KEY 
+    });
   });
 
   app.get("/api/youtube/test", async (req, res) => {
