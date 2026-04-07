@@ -12,20 +12,38 @@ async function startServer() {
   const PORT = 3000;
 
   // API Routes
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", message: "Server is running" });
+  });
+
+  app.get("/api/youtube/test", async (req, res) => {
+    try {
+      const searchFn = (yts as any).default || yts;
+      const r = await searchFn("bollywood");
+      res.json({ success: true, count: r.videos.length });
+    } catch (error) {
+      res.status(500).json({ success: false, error: String(error) });
+    }
+  });
+
   app.get("/api/youtube/search", async (req, res) => {
     const query = req.query.q as string;
+    console.log(`[YouTube Search] Received query: "${query}"`);
     if (!query) {
       return res.status(400).json({ error: "Missing query" });
     }
 
     try {
-      const r = await yts(query);
-      const videos = r.videos.slice(0, 10).map(v => ({
+      // Handle potential ESM/CJS default export issues
+      const searchFn = (yts as any).default || yts;
+      const r = await searchFn(query);
+      const videos = r.videos.slice(0, 10).map((v: any) => ({
         id: v.videoId,
         title: v.title,
         thumbnail: v.thumbnail,
         category: "Search Result"
       }));
+      console.log(`[YouTube Search] Found ${videos.length} videos`);
       res.json(videos);
     } catch (error) {
       console.error("YouTube search error:", error);
@@ -35,6 +53,7 @@ async function startServer() {
 
   app.get("/api/youtube/category", async (req, res) => {
     const category = req.query.cat as string;
+    console.log(`[YouTube Category] Received category: "${category}"`);
     if (!category) {
       return res.status(400).json({ error: "Missing category" });
     }
@@ -48,13 +67,15 @@ async function startServer() {
     const query = queryMap[category] || category;
 
     try {
-      const r = await yts(query);
-      const videos = r.videos.slice(0, 6).map(v => ({
+      const searchFn = (yts as any).default || yts;
+      const r = await searchFn(query);
+      const videos = r.videos.slice(0, 6).map((v: any) => ({
         id: v.videoId,
         title: v.title,
         thumbnail: v.thumbnail,
         category: category
       }));
+      console.log(`[YouTube Category] Found ${videos.length} videos for "${category}"`);
       res.json(videos);
     } catch (error) {
       console.error("YouTube category error:", error);

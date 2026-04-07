@@ -20,5 +20,9 @@ export interface Game {
   id: string;
   title: string;
   icon: string;
+  color: string;
   category: 'FUN' | 'BRAIN';
+  description: string;
+  url?: string;
+  isLocal?: boolean;
 }

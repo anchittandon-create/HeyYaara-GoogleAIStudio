@@ -1,30 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Gamepad2, Brain, X, Play, Trophy, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Gamepad2, Brain, X, Play, Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
-
-interface Game {
-  id: string;
-  title: string;
-  icon: string;
-  color: string;
-  category: 'FUN' | 'BRAIN';
-  description: string;
-  url: string;
-}
+import { Game } from '../types';
 
 const GAMES: Game[] = [
   // Fun Games
-  { id: "ludo", title: "Ludo", icon: "🎲", color: "bg-red-500", category: "FUN", description: "Classic board game", url: "https://www.google.com/logos/2010/pacman10-i.html" }, // Using pacman as a placeholder for "instant play"
-  { id: "snakes", title: "Snakes & Ladders", icon: "🐍", color: "bg-green-500", category: "FUN", description: "Climb the ladders", url: "https://poki.com/en/g/snakes-and-ladders" },
-  { id: "carrom", title: "Carrom", icon: "⚪", color: "bg-amber-700", category: "FUN", description: "Strike the coins", url: "https://poki.com/en/g/carrom-clash" },
-  { id: "hockey", title: "Air Hockey", icon: "🏒", color: "bg-blue-500", category: "FUN", description: "Fast-paced fun", url: "https://poki.com/en/g/air-hockey-championship-deluxe" },
-  { id: "ttt", title: "Tic Tac Toe", icon: "❌", color: "bg-purple-500", category: "FUN", description: "Three in a row", url: "https://playtictactoe.org/" },
+  { id: "ttt", title: "Tic Tac Toe", icon: "❌", color: "bg-purple-500", category: "FUN", description: "Three in a row", isLocal: true },
+  { id: "pacman", title: "Pacman", icon: "🟡", color: "bg-yellow-500", category: "FUN", description: "Eat the dots", url: "https://www.google.com/logos/2010/pacman10-i.html" },
   { id: "bubble", title: "Bubble Shooter", icon: "🫧", color: "bg-pink-500", category: "FUN", description: "Pop the bubbles", url: "https://www.bubbleshooter.net/" },
   
   // Brain Games
-  { id: "memory", title: "Memory Game", icon: "🧠", color: "bg-indigo-500", category: "BRAIN", description: "Match the pairs", url: "https://poki.com/en/g/memory-match-master" },
-  { id: "quiz", title: "Quiz", icon: "❓", color: "bg-orange-500", category: "BRAIN", description: "Test your brain", url: "https://poki.com/en/g/google-feud" },
+  { id: "memory", title: "Memory Game", icon: "🧠", color: "bg-indigo-500", category: "BRAIN", description: "Match the pairs", isLocal: true },
+  { id: "quiz", title: "Quiz", icon: "❓", color: "bg-orange-500", category: "BRAIN", description: "Test your brain", url: "https://www.helpfulgames.com/quiz/general-knowledge.html" },
 ];
 
 export default function Games({ initialGameId }: { initialGameId?: string }) {
@@ -93,18 +81,171 @@ export default function Games({ initialGameId }: { initialGameId?: string }) {
                 </button>
               </div>
               
-              <div className="flex-1 bg-gray-100 relative">
-                <iframe 
-                  src={selectedGame.url}
-                  className="w-full h-full border-none"
-                  title={selectedGame.title}
-                  allow="autoplay; fullscreen"
-                />
+              <div className="flex-1 bg-gray-100 relative overflow-auto">
+                {selectedGame.isLocal ? (
+                  <div className="w-full h-full flex items-center justify-center p-8 bg-white">
+                    {selectedGame.id === 'ttt' && <TicTacToe />}
+                    {selectedGame.id === 'memory' && <MemoryGame />}
+                  </div>
+                ) : (
+                  <iframe 
+                    src={selectedGame.url}
+                    className="w-full h-full border-none"
+                    title={selectedGame.title}
+                    allow="autoplay; fullscreen"
+                  />
+                )}
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+    </div>
+  );
+}
+
+// --- Local Game Components ---
+
+function TicTacToe() {
+  const [board, setBoard] = useState(Array(9).fill(null));
+  const [isXNext, setIsXNext] = useState(true);
+  
+  const calculateWinner = (squares: any[]) => {
+    const lines = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+    for (let i = 0; i < lines.length; i++) {
+      const [a, b, c] = lines[i];
+      if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+        return squares[a];
+      }
+    }
+    return null;
+  };
+
+  const winner = calculateWinner(board);
+  const isDraw = !winner && board.every(s => s !== null);
+
+  const handleClick = (i: number) => {
+    if (winner || board[i]) return;
+    const newBoard = board.slice();
+    newBoard[i] = isXNext ? 'X' : 'O';
+    setBoard(newBoard);
+    setIsXNext(!isXNext);
+  };
+
+  const reset = () => {
+    setBoard(Array(9).fill(null));
+    setIsXNext(true);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-10">
+      <div className="text-4xl font-bold text-gray-800">
+        {winner ? `Winner: ${winner}` : isDraw ? "It's a Draw!" : `Next Player: ${isXNext ? 'X' : 'O'}`}
+      </div>
+      <div className="grid grid-cols-3 gap-4">
+        {board.map((val, i) => (
+          <button
+            key={i}
+            onClick={() => handleClick(i)}
+            className="w-32 h-32 md:w-40 md:h-40 bg-gray-50 border-4 border-gray-200 rounded-3xl text-6xl font-bold flex items-center justify-center hover:bg-gray-100 transition-colors"
+          >
+            <span className={val === 'X' ? 'text-red-500' : 'text-blue-500'}>{val}</span>
+          </button>
+        ))}
+      </div>
+      <button 
+        onClick={reset}
+        className="px-12 py-6 bg-green-500 text-white text-3xl font-bold rounded-full shadow-xl hover:bg-green-600 transition-all"
+      >
+        Play Again
+      </button>
+    </div>
+  );
+}
+
+function MemoryGame() {
+  const icons = ['🍎', '🍌', '🍇', '🍓', '🍒', '🍍', '🥝', '🍉'];
+  const [cards, setCards] = useState<{ id: number, icon: string, flipped: boolean, matched: boolean }[]>([]);
+  const [flippedCards, setFlippedCards] = useState<number[]>([]);
+  const [moves, setMoves] = useState(0);
+
+  const initGame = () => {
+    const shuffled = [...icons, ...icons]
+      .sort(() => Math.random() - 0.5)
+      .map((icon, index) => ({ id: index, icon, flipped: false, matched: false }));
+    setCards(shuffled);
+    setFlippedCards([]);
+    setMoves(0);
+  };
+
+  useEffect(() => {
+    initGame();
+  }, []);
+
+  const handleFlip = (id: number) => {
+    if (flippedCards.length === 2 || cards[id].flipped || cards[id].matched) return;
+    
+    const newCards = [...cards];
+    newCards[id].flipped = true;
+    setCards(newCards);
+    
+    const newFlipped = [...flippedCards, id];
+    setFlippedCards(newFlipped);
+
+    if (newFlipped.length === 2) {
+      setMoves(m => m + 1);
+      const [first, second] = newFlipped;
+      if (cards[first].icon === cards[second].icon) {
+        setTimeout(() => {
+          const matchedCards = [...cards];
+          matchedCards[first].matched = true;
+          matchedCards[second].matched = true;
+          setCards(matchedCards);
+          setFlippedCards([]);
+        }, 500);
+      } else {
+        setTimeout(() => {
+          const resetCards = [...cards];
+          resetCards[first].flipped = false;
+          resetCards[second].flipped = false;
+          setCards(resetCards);
+          setFlippedCards([]);
+        }, 1000);
+      }
+    }
+  };
+
+  const isWon = cards.length > 0 && cards.every(c => c.matched);
+
+  return (
+    <div className="flex flex-col items-center gap-10">
+      <div className="text-4xl font-bold text-gray-800">
+        {isWon ? "You Won!" : `Moves: ${moves}`}
+      </div>
+      <div className="grid grid-cols-4 gap-4">
+        {cards.map((card) => (
+          <button
+            key={card.id}
+            onClick={() => handleFlip(card.id)}
+            className={cn(
+              "w-24 h-24 md:w-32 md:h-32 rounded-3xl text-5xl flex items-center justify-center transition-all duration-300 transform shadow-lg",
+              card.flipped || card.matched ? "bg-white rotate-y-180" : "bg-indigo-500"
+            )}
+          >
+            {(card.flipped || card.matched) ? card.icon : ""}
+          </button>
+        ))}
+      </div>
+      <button 
+        onClick={initGame}
+        className="px-12 py-6 bg-indigo-500 text-white text-3xl font-bold rounded-full shadow-xl hover:bg-indigo-600 transition-all"
+      >
+        Reset Game
+      </button>
     </div>
   );
 }
@@ -169,7 +310,10 @@ function GameSection({ title, icon, games, onSelect }: GameSectionProps) {
               <h3 className="text-2xl font-bold text-gray-900">{game.title}</h3>
               <p className="text-lg text-gray-500 mt-1 line-clamp-1">{game.description}</p>
             </div>
-            <button className={cn("w-full py-3 rounded-2xl text-white text-xl font-bold shadow-md", game.color)}>
+            <button 
+              onClick={(e) => { e.stopPropagation(); onSelect(game); }}
+              className={cn("w-full py-3 rounded-2xl text-white text-xl font-bold shadow-md", game.color)}
+            >
               Play
             </button>
           </motion.div>

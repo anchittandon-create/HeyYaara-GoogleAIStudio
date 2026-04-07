@@ -9,11 +9,11 @@ const FALLBACK_VIDEOS: Record<string, YouTubeVideo[]> = {
   ],
   "Bhajans": [
     { id: "S-Xm76n_m_w", title: "Hanuman Chalisa - Gulshan Kumar", thumbnail: "https://img.youtube.com/vi/S-Xm76n_m_w/0.jpg", category: "Bhajans" },
-    { id: "m77H_S_S_S_w", title: "Gayatri Mantra - 108 Times", thumbnail: "https://img.youtube.com/vi/m77H_S_S_S_w/0.jpg", category: "Bhajans" },
+    { id: "A_fIn7jQlpM", title: "Gayatri Mantra - 108 Times", thumbnail: "https://img.youtube.com/vi/A_fIn7jQlpM/0.jpg", category: "Bhajans" },
     { id: "v_v_u8V_u8", title: "Shri Krishna Bhajans", thumbnail: "https://img.youtube.com/vi/v_v_u8V_u8/0.jpg", category: "Bhajans" },
   ],
   "Punjabi Songs": [
-    { id: "v_v_u8V_u8", title: "Gurdas Maan Folk - Challa", thumbnail: "https://img.youtube.com/vi/v_v_u8V_u8/0.jpg", category: "Punjabi Songs" },
+    { id: "V7LwfY5U5WI", title: "Gurdas Maan Folk - Challa", thumbnail: "https://img.youtube.com/vi/V7LwfY5U5WI/0.jpg", category: "Punjabi Songs" },
     { id: "6L6Xq6Oj_88", title: "Classic Punjabi Hits", thumbnail: "https://img.youtube.com/vi/6L6Xq6Oj_88/0.jpg", category: "Punjabi Songs" },
   ]
 };
