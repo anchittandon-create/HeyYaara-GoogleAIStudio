@@ -7,12 +7,12 @@ import { Game } from '../types';
 const GAMES: Game[] = [
   // Fun Games
   { id: "ttt", title: "Tic Tac Toe", icon: "❌", color: "bg-purple-500", category: "FUN", description: "Three in a row", isLocal: true },
+  { id: "snake", title: "Snake", icon: "🐍", color: "bg-green-500", category: "FUN", description: "Eat and grow", isLocal: true },
   { id: "pacman", title: "Pacman", icon: "🟡", color: "bg-yellow-500", category: "FUN", description: "Eat the dots", url: "https://www.google.com/logos/2010/pacman10-i.html" },
-  { id: "bubble", title: "Bubble Shooter", icon: "🫧", color: "bg-pink-500", category: "FUN", description: "Pop the bubbles", url: "https://www.bubbleshooter.net/" },
   
   // Brain Games
   { id: "memory", title: "Memory Game", icon: "🧠", color: "bg-indigo-500", category: "BRAIN", description: "Match the pairs", isLocal: true },
-  { id: "quiz", title: "Quiz", icon: "❓", color: "bg-orange-500", category: "BRAIN", description: "Test your brain", url: "https://www.helpfulgames.com/quiz/general-knowledge.html" },
+  { id: "sudoku", title: "Sudoku", icon: "🔢", color: "bg-orange-500", category: "BRAIN", description: "Number puzzle", isLocal: true },
 ];
 
 export default function Games({ initialGameId }: { initialGameId?: string }) {
@@ -29,8 +29,8 @@ export default function Games({ initialGameId }: { initialGameId?: string }) {
   return (
     <div className="flex flex-col h-full bg-[#F5F9FF] overflow-hidden">
       {/* Header - Compact */}
-      <div className="px-8 py-4 md:py-6 bg-white border-b-2 border-blue-50 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="px-8 py-4 md:py-6 bg-white border-b-2 border-blue-50 flex items-center justify-between z-10 shadow-sm">
+        <div className="flex items-center gap-4 pl-20 md:pl-24">
           <div className="p-3 bg-green-500 rounded-2xl text-white">
             <Gamepad2 className="w-8 h-8" />
           </div>
@@ -42,7 +42,7 @@ export default function Games({ initialGameId }: { initialGameId?: string }) {
       </div>
 
       {/* Game Sections - Compact to avoid vertical scroll */}
-      <div className="flex-1 flex flex-col justify-center p-4 md:p-8 gap-6 overflow-hidden">
+      <div className="flex-1 flex flex-col justify-center p-4 md:p-8 gap-8 overflow-y-auto scrollbar-hide">
         <GameSection 
           title="Fun Games" 
           icon={<Star className="w-8 h-8 text-yellow-500 fill-current" />}
@@ -75,17 +75,19 @@ export default function Games({ initialGameId }: { initialGameId?: string }) {
                 </div>
                 <button 
                   onClick={() => setSelectedGame(null)}
-                  className="p-4 bg-white/20 hover:bg-white/40 rounded-full transition-all"
+                  className="p-4 bg-white/20 hover:bg-white/40 rounded-full transition-all active:scale-90"
                 >
                   <X className="w-10 h-10" />
                 </button>
               </div>
               
-              <div className="flex-1 bg-gray-100 relative overflow-auto">
+              <div className="flex-1 bg-gray-100 relative overflow-auto flex items-center justify-center">
                 {selectedGame.isLocal ? (
-                  <div className="w-full h-full flex items-center justify-center p-8 bg-white">
+                  <div className="w-full h-full flex items-center justify-center p-4 md:p-8 bg-white overflow-auto">
                     {selectedGame.id === 'ttt' && <TicTacToe />}
                     {selectedGame.id === 'memory' && <MemoryGame />}
+                    {selectedGame.id === 'snake' && <SnakeGame />}
+                    {selectedGame.id === 'sudoku' && <SudokuGame />}
                   </div>
                 ) : (
                   <iframe 
@@ -142,16 +144,16 @@ function TicTacToe() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-10">
-      <div className="text-4xl font-bold text-gray-800">
+    <div className="flex flex-col items-center gap-8 md:gap-10 max-w-full">
+      <div className="text-3xl md:text-4xl font-bold text-gray-800 text-center">
         {winner ? `Winner: ${winner}` : isDraw ? "It's a Draw!" : `Next Player: ${isXNext ? 'X' : 'O'}`}
       </div>
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-3 md:gap-4">
         {board.map((val, i) => (
           <button
             key={i}
             onClick={() => handleClick(i)}
-            className="w-32 h-32 md:w-40 md:h-40 bg-gray-50 border-4 border-gray-200 rounded-3xl text-6xl font-bold flex items-center justify-center hover:bg-gray-100 transition-colors"
+            className="w-24 h-24 md:w-40 md:h-40 bg-gray-50 border-4 border-gray-200 rounded-3xl text-5xl md:text-6xl font-bold flex items-center justify-center hover:bg-gray-100 transition-colors active:scale-95"
           >
             <span className={val === 'X' ? 'text-red-500' : 'text-blue-500'}>{val}</span>
           </button>
@@ -159,7 +161,7 @@ function TicTacToe() {
       </div>
       <button 
         onClick={reset}
-        className="px-12 py-6 bg-green-500 text-white text-3xl font-bold rounded-full shadow-xl hover:bg-green-600 transition-all"
+        className="px-10 py-5 md:px-12 md:py-6 bg-green-500 text-white text-2xl md:text-3xl font-bold rounded-full shadow-xl hover:bg-green-600 transition-all active:scale-95"
       >
         Play Again
       </button>
@@ -222,18 +224,18 @@ function MemoryGame() {
   const isWon = cards.length > 0 && cards.every(c => c.matched);
 
   return (
-    <div className="flex flex-col items-center gap-10">
-      <div className="text-4xl font-bold text-gray-800">
+    <div className="flex flex-col items-center gap-8 md:gap-10 max-w-full">
+      <div className="text-3xl md:text-4xl font-bold text-gray-800 text-center">
         {isWon ? "You Won!" : `Moves: ${moves}`}
       </div>
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-4 gap-3 md:gap-4">
         {cards.map((card) => (
           <button
             key={card.id}
             onClick={() => handleFlip(card.id)}
             className={cn(
-              "w-24 h-24 md:w-32 md:h-32 rounded-3xl text-5xl flex items-center justify-center transition-all duration-300 transform shadow-lg",
-              card.flipped || card.matched ? "bg-white rotate-y-180" : "bg-indigo-500"
+              "w-20 h-20 md:w-32 md:h-32 rounded-3xl text-4xl md:text-5xl flex items-center justify-center transition-all duration-300 transform shadow-lg active:scale-95",
+              card.flipped || card.matched ? "bg-white" : "bg-indigo-500"
             )}
           >
             {(card.flipped || card.matched) ? card.icon : ""}
@@ -242,9 +244,192 @@ function MemoryGame() {
       </div>
       <button 
         onClick={initGame}
-        className="px-12 py-6 bg-indigo-500 text-white text-3xl font-bold rounded-full shadow-xl hover:bg-indigo-600 transition-all"
+        className="px-10 py-5 md:px-12 md:py-6 bg-indigo-500 text-white text-2xl md:text-3xl font-bold rounded-full shadow-xl hover:bg-indigo-600 transition-all active:scale-95"
       >
         Reset Game
+      </button>
+    </div>
+  );
+}
+
+function SnakeGame() {
+  const [snake, setSnake] = useState([{ x: 10, y: 10 }]);
+  const [food, setFood] = useState({ x: 5, y: 5 });
+  const [direction, setDirection] = useState({ x: 0, y: -1 });
+  const [isGameOver, setIsGameOver] = useState(false);
+  const [score, setScore] = useState(0);
+  const gameBoardSize = 20;
+
+  useEffect(() => {
+    if (isGameOver) return;
+
+    const moveSnake = setInterval(() => {
+      setSnake(prev => {
+        const head = { x: prev[0].x + direction.x, y: prev[0].y + direction.y };
+        
+        // Wall collision
+        if (head.x < 0 || head.x >= gameBoardSize || head.y < 0 || head.y >= gameBoardSize) {
+          setIsGameOver(true);
+          return prev;
+        }
+
+        // Self collision
+        if (prev.some(segment => segment.x === head.x && segment.y === head.y)) {
+          setIsGameOver(true);
+          return prev;
+        }
+
+        const newSnake = [head, ...prev];
+        
+        // Food collision
+        if (head.x === food.x && head.y === food.y) {
+          setScore(s => s + 1);
+          setFood({
+            x: Math.floor(Math.random() * gameBoardSize),
+            y: Math.floor(Math.random() * gameBoardSize)
+          });
+        } else {
+          newSnake.pop();
+        }
+        
+        return newSnake;
+      });
+    }, 200);
+
+    return () => clearInterval(moveSnake);
+  }, [direction, food, isGameOver]);
+
+  const reset = () => {
+    setSnake([{ x: 10, y: 10 }]);
+    setFood({ x: 5, y: 5 });
+    setDirection({ x: 0, y: -1 });
+    setIsGameOver(false);
+    setScore(0);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-6 md:gap-8 max-w-full">
+      <div className="text-3xl md:text-4xl font-bold text-gray-800 text-center">
+        {isGameOver ? "Game Over!" : `Score: ${score}`}
+      </div>
+      
+      <div 
+        className="relative bg-gray-900 rounded-2xl overflow-hidden shadow-2xl"
+        style={{ width: 'min(80vw, 400px)', height: 'min(80vw, 400px)' }}
+      >
+        {snake.map((segment, i) => (
+          <div 
+            key={i}
+            className="absolute bg-green-500 rounded-sm border border-gray-900"
+            style={{ 
+              width: '5%', height: '5%', 
+              left: `${segment.x * 5}%`, top: `${segment.y * 5}%` 
+            }}
+          />
+        ))}
+        <div 
+          className="absolute bg-red-500 rounded-full"
+          style={{ 
+            width: '5%', height: '5%', 
+            left: `${food.x * 5}%`, top: `${food.y * 5}%` 
+          }}
+        />
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <div />
+        <button onClick={() => setDirection({ x: 0, y: -1 })} className="p-6 bg-gray-200 rounded-2xl active:scale-90 transition-all"><Play className="-rotate-90" /></button>
+        <div />
+        <button onClick={() => setDirection({ x: -1, y: 0 })} className="p-6 bg-gray-200 rounded-2xl active:scale-90 transition-all"><Play className="rotate-180" /></button>
+        <button onClick={() => setDirection({ x: 0, y: 1 })} className="p-6 bg-gray-200 rounded-2xl active:scale-90 transition-all"><Play className="rotate-90" /></button>
+        <button onClick={() => setDirection({ x: 1, y: 0 })} className="p-6 bg-gray-200 rounded-2xl active:scale-90 transition-all"><Play /></button>
+      </div>
+
+      {isGameOver && (
+        <button 
+          onClick={reset}
+          className="px-10 py-5 bg-green-500 text-white text-2xl font-bold rounded-full shadow-xl active:scale-95"
+        >
+          Try Again
+        </button>
+      )}
+    </div>
+  );
+}
+
+function SudokuGame() {
+  // Simple 4x4 Sudoku for elderly users
+  const initialGrid = [
+    [1, null, null, 2],
+    [null, 2, 1, null],
+    [null, 1, 2, null],
+    [2, null, null, 1]
+  ];
+  const solution = [
+    [1, 3, 4, 2],
+    [4, 2, 1, 3],
+    [3, 1, 2, 4],
+    [2, 4, 3, 1]
+  ];
+
+  const [grid, setGrid] = useState(initialGrid);
+  const [selectedCell, setSelectedCell] = useState<[number, number] | null>(null);
+
+  const handleCellClick = (r: number, c: number) => {
+    if (initialGrid[r][c] !== null) return;
+    setSelectedCell([r, c]);
+  };
+
+  const handleNumberInput = (num: number) => {
+    if (!selectedCell) return;
+    const [r, c] = selectedCell;
+    const newGrid = grid.map(row => [...row]);
+    newGrid[r][c] = num;
+    setGrid(newGrid);
+    setSelectedCell(null);
+  };
+
+  const isWon = grid.every((row, r) => row.every((val, c) => val === solution[r][c]));
+
+  return (
+    <div className="flex flex-col items-center gap-8 md:gap-10 max-w-full">
+      <div className="text-3xl md:text-4xl font-bold text-gray-800 text-center">
+        {isWon ? "Sudoku Solved!" : "Fill the Numbers"}
+      </div>
+      
+      <div className="grid grid-cols-4 gap-1 bg-gray-300 p-1 rounded-xl shadow-lg">
+        {grid.map((row, r) => row.map((val, c) => (
+          <button
+            key={`${r}-${c}`}
+            onClick={() => handleCellClick(r, c)}
+            className={cn(
+              "w-16 h-16 md:w-24 md:h-24 flex items-center justify-center text-3xl md:text-4xl font-bold transition-all",
+              initialGrid[r][c] !== null ? "bg-gray-100 text-gray-500" : 
+              selectedCell?.[0] === r && selectedCell?.[1] === c ? "bg-blue-100 text-blue-600" : "bg-white text-gray-900"
+            )}
+          >
+            {val}
+          </button>
+        )))}
+      </div>
+
+      <div className="flex gap-4">
+        {[1, 2, 3, 4].map(num => (
+          <button
+            key={num}
+            onClick={() => handleNumberInput(num)}
+            className="w-16 h-16 md:w-20 md:h-20 bg-indigo-500 text-white text-3xl font-bold rounded-2xl shadow-md active:scale-90"
+          >
+            {num}
+          </button>
+        ))}
+      </div>
+
+      <button 
+        onClick={() => setGrid(initialGrid)}
+        className="px-10 py-5 bg-gray-200 text-gray-700 text-2xl font-bold rounded-full active:scale-95"
+      >
+        Reset
       </button>
     </div>
   );
