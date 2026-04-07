@@ -1,16 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { PhoneOff, MessageSquare, Volume2, VolumeX, Mic, MicOff } from 'lucide-react';
-import { GoogleGenAI, Modality, LiveServerMessage } from "@google/genai";
+import { GoogleGenAI, Modality, LiveServerMessage, FunctionDeclaration, Type } from "@google/genai";
 import VoiceOrb from './VoiceOrb';
-import { VoiceState, Message } from '@/src/types';
+import { VoiceState, Message, AppState } from '@/src/types';
 import { cn } from '@/src/lib/utils';
 
 interface TalkProps {
   onEnd: () => void;
+  onNavigate: (state: AppState, extra?: any) => void;
 }
 
-export default function Talk({ onEnd }: TalkProps) {
+export default function Talk({ onEnd, onNavigate }: TalkProps) {
   const [state, setState] = useState<VoiceState>('INITIALIZING');
   const [messages, setMessages] = useState<Message[]>([]);
   const [showTranscript, setShowTranscript] = useState(true);
@@ -37,10 +38,60 @@ export default function Talk({ onEnd }: TalkProps) {
             speechConfig: {
               voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
             },
-            tools: [{ googleSearch: {} }],
+            tools: [
+              { googleSearch: {} },
+              {
+                functionDeclarations: [
+                  {
+                    name: "navigateTo",
+                    description: "Navigate to a specific page in the app.",
+                    parameters: {
+                      type: Type.OBJECT,
+                      properties: {
+                        page: {
+                          type: Type.STRING,
+                          enum: ["HOME", "MUSIC", "GAMES", "TALK"],
+                          description: "The page to navigate to."
+                        }
+                      },
+                      required: ["page"]
+                    }
+                  },
+                  {
+                    name: "playMusic",
+                    description: "Search and play a specific song or category of music.",
+                    parameters: {
+                      type: Type.OBJECT,
+                      properties: {
+                        query: {
+                          type: Type.STRING,
+                          description: "The song name, artist, or category (e.g., 'Bhajans', 'Old Bollywood')."
+                        }
+                      },
+                      required: ["query"]
+                    }
+                  },
+                  {
+                    name: "openGame",
+                    description: "Open a specific game.",
+                    parameters: {
+                      type: Type.OBJECT,
+                      properties: {
+                        gameId: {
+                          type: Type.STRING,
+                          enum: ["ludo", "snakes", "carrom", "hockey", "ttt", "bubble", "memory", "quiz"],
+                          description: "The ID of the game to open."
+                        }
+                      },
+                      required: ["gameId"]
+                    }
+                  }
+                ]
+              }
+            ],
             inputAudioTranscription: {},
             outputAudioTranscription: {},
-            systemInstruction: "You are Yaara, a warm, wise, and friendly AI companion for elderly users. Speak slowly, clearly, and with empathy in a mix of Hindi, English, and Punjabi (Hinglish). Keep responses concise (1-2 sentences) but meaningful. Be supportive, patient, and engaging. Never repeat what the user said. If there is silence, provide a gentle prompt or reassurance. CRITICAL: Always use the Google Search tool to provide accurate, real-time information for ANY factual questions about news, weather, sports, health tips, or current events. Your goal is to be a reliable source of truth and a comforting presence.",
+            systemInstruction: "You are Yaara, a warm, wise, and friendly AI companion for elderly users. Speak slowly, clearly, and with empathy in a mix of Hindi, English, and Punjabi (Hinglish). Keep responses concise (1-2 sentences) but meaningful. Be supportive, patient, and engaging. Never repeat what the user said. If there is silence, provide a gentle prompt or reassurance. \n\nCRITICAL CAPABILITIES:\n1. Use 'googleSearch' for ANY factual questions (news, weather, health tips).\n2. Use 'navigateTo' if the user wants to go to a different section (e.g., 'Home le chalo', 'Music dikhao').\n3. Use 'playMusic' if the user wants to listen to something (e.g., 'Bhajan chalao', 'Kishore Kumar ke gaane').\n4. Use 'openGame' if the user wants to play a game (e.g., 'Ludo khelna hai', 'Koi game kholo').\n\nYour goal is to be a reliable source of truth, a comforting presence, and a helpful guide through the app.",
           },
           callbacks: {
             onopen: () => {
@@ -66,6 +117,23 @@ export default function Talk({ onEnd }: TalkProps) {
               const modelTranscript = message.serverContent?.modelTurn?.parts?.[0]?.text;
               if (modelTranscript) {
                 addMessage(modelTranscript, 'YAARA');
+              }
+
+              // Handle tool calls
+              const toolCalls = message.serverContent?.modelTurn?.parts?.filter(p => p.functionCall);
+              if (toolCalls && toolCalls.length > 0) {
+                for (const part of toolCalls) {
+                  const call = part.functionCall!;
+                  console.log("Tool call:", call);
+                  
+                  if (call.name === 'navigateTo') {
+                    onNavigate(call.args.page as any);
+                  } else if (call.name === 'playMusic') {
+                    onNavigate('MUSIC', { query: call.args.query });
+                  } else if (call.name === 'openGame') {
+                    onNavigate('GAMES', { gameId: call.args.gameId });
+                  }
+                }
               }
 
               const userTranscript = (message.serverContent as any)?.userTurn?.parts?.[0]?.text;

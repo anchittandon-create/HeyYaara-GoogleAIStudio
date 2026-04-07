@@ -1,97 +1,111 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Play, X, Music as MusicIcon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Play, X, Music as MusicIcon, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
+import { YouTubeVideo } from '../types';
+import { searchVideos, getCategoryVideos } from '../services/youtubeService';
+import { useQuery } from '@tanstack/react-query';
 
-interface Video {
-  id: string;
-  title: string;
-  thumbnail: string;
-  category: string;
-}
+const CATEGORIES = ["Old Bollywood Songs", "Bhajans", "Punjabi Songs"];
 
-const CATEGORIES = [
-  { name: "Old Bollywood", query: "old bollywood songs 60s 70s" },
-  { name: "Bhajans", query: "popular bhajans hindi" },
-  { name: "Punjabi Classics", query: "old punjabi folk songs" },
-];
+export default function Music({ initialQuery }: { initialQuery?: string }) {
+  const [searchQuery, setSearchQuery] = useState(initialQuery || "");
+  const [debouncedSearch, setDebouncedSearch] = useState(initialQuery || "");
+  const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
 
-const MOCK_VIDEOS: Video[] = [
-  { id: "T94PHkuydcw", title: "Lata Mangeshkar Hits - Lag Jaa Gale", thumbnail: "https://img.youtube.com/vi/T94PHkuydcw/0.jpg", category: "Old Bollywood" },
-  { id: "hT_nvWreIhg", title: "Kishore Kumar Classics - Pal Pal Dil Ke Paas", thumbnail: "https://img.youtube.com/vi/hT_nvWreIhg/0.jpg", category: "Old Bollywood" },
-  { id: "S-Xm76n_m_w", title: "Hanuman Chalisa - Gulshan Kumar", thumbnail: "https://img.youtube.com/vi/S-Xm76n_m_w/0.jpg", category: "Bhajans" },
-  { id: "v_v_u8V_u8", title: "Gurdas Maan Folk - Challa", thumbnail: "https://img.youtube.com/vi/v_v_u8V_u8/0.jpg", category: "Punjabi Classics" },
-  { id: "6L6Xq6Oj_88", title: "Mohammed Rafi Hits - Kya Hua Tera Wada", thumbnail: "https://img.youtube.com/vi/6L6Xq6Oj_88/0.jpg", category: "Old Bollywood" },
-  { id: "m77H_S_S_S_w", title: "Gayatri Mantra - 108 Times", thumbnail: "https://img.youtube.com/vi/m77H_S_S_S_w/0.jpg", category: "Bhajans" },
-];
+  // Update search if initialQuery changes
+  useEffect(() => {
+    if (initialQuery) {
+      setSearchQuery(initialQuery);
+      setDebouncedSearch(initialQuery);
+    }
+  }, [initialQuery]);
 
-export default function Music() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  // Debounce search input
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Search Results Query
+  const { data: searchResults, isLoading: isSearching } = useQuery({
+    queryKey: ['search', debouncedSearch],
+    queryFn: () => searchVideos(debouncedSearch),
+    enabled: debouncedSearch.length > 2,
+  });
 
   return (
-    <div className="flex flex-col h-full bg-pink-50 overflow-y-auto">
+    <div className="flex flex-col h-full bg-[#FFF9F5] overflow-y-auto">
       {/* Header & Search */}
-      <div className="p-8 md:p-12 bg-white shadow-sm space-y-8">
+      <div className="p-8 md:p-12 bg-white shadow-md sticky top-0 z-20 space-y-8">
         <div className="flex items-center gap-6">
-          <div className="p-4 bg-pink-500 rounded-2xl text-white">
-            <MusicIcon className="w-10 h-10" />
+          <div className="p-5 bg-orange-500 rounded-3xl text-white shadow-lg">
+            <MusicIcon className="w-12 h-12" />
           </div>
-          <h1 className="text-5xl md:text-6xl font-bold text-gray-900">Music</h1>
+          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 tracking-tight">Music</h1>
         </div>
 
-        <div className="relative max-w-5xl mx-auto">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 w-10 h-10 text-gray-400" />
+        <div className="relative max-w-6xl mx-auto group">
+          <Search className="absolute left-8 top-1/2 -translate-y-1/2 w-12 h-12 text-gray-400 group-focus-within:text-orange-500 transition-colors" />
           <input 
             type="text"
-            placeholder="Gaana search karein..."
+            placeholder="Search songs (Hindi, English, Punjabi)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-20 pr-8 py-8 text-3xl rounded-3xl border-4 border-pink-100 focus:border-pink-500 outline-none transition-all shadow-lg"
+            className="w-full pl-24 pr-12 py-10 text-4xl rounded-[40px] border-4 border-orange-50 focus:border-orange-500 outline-none transition-all shadow-xl bg-orange-50/30 placeholder:text-gray-400"
           />
+          {isSearching && (
+            <div className="absolute right-8 top-1/2 -translate-y-1/2">
+              <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Categories */}
-      <div className="flex-1 p-8 md:p-12 space-y-16">
-        {CATEGORIES.map((cat) => (
-          <section key={cat.name} className="space-y-6">
+      {/* Content Area */}
+      <div className="flex-1 p-8 md:p-12 space-y-20 pb-24">
+        {debouncedSearch.length > 2 ? (
+          <section className="space-y-10">
             <div className="flex items-center justify-between px-4">
-              <h2 className="text-4xl font-bold text-gray-800">{cat.name}</h2>
-              <button className="text-2xl font-semibold text-pink-600 hover:underline">View All</button>
+              <h2 className="text-5xl font-bold text-gray-900">Search Results</h2>
+              <button 
+                onClick={() => setSearchQuery("")}
+                className="text-3xl font-bold text-orange-600 hover:text-orange-700 p-4"
+              >
+                Clear
+              </button>
             </div>
             
-            <div className="flex gap-8 overflow-x-auto pb-8 px-4 scrollbar-hide snap-x">
-              {MOCK_VIDEOS.filter(v => v.category === cat.name).map((video) => (
-                <motion.div
-                  key={video.id}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => setSelectedVideo(video)}
-                  className="flex-shrink-0 w-80 md:w-96 bg-white rounded-3xl overflow-hidden shadow-xl cursor-pointer snap-start"
-                >
-                  <div className="relative aspect-video">
-                    <img 
-                      src={video.thumbnail} 
-                      alt={video.title}
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute inset-0 bg-black/20 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                      <div className="w-20 h-20 bg-white/90 rounded-full flex items-center justify-center">
-                        <Play className="w-10 h-10 text-pink-600 fill-current ml-1" />
-                      </div>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-2xl font-bold text-gray-900 line-clamp-2">{video.title}</h3>
-                    <p className="text-xl text-gray-500 mt-2">{video.category}</p>
-                  </div>
-                </motion.div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10 px-4">
+              {searchResults?.map((video) => (
+                <VideoCard key={video.id} video={video} onClick={() => setSelectedVideo(video)} />
               ))}
+              {searchResults?.length === 0 && !isSearching && (
+                <div className="col-span-full py-20 text-center space-y-6">
+                  <p className="text-4xl text-gray-400 font-medium italic">"Koi gaana nahi mila..."</p>
+                  <button 
+                    onClick={() => setSearchQuery("")}
+                    className="px-12 py-6 bg-orange-500 text-white text-3xl font-bold rounded-full shadow-xl"
+                  >
+                    Go Back
+                  </button>
+                </div>
+              )}
             </div>
           </section>
-        ))}
+        ) : (
+          <>
+            {CATEGORIES.map((cat) => (
+              <CategorySection 
+                key={cat} 
+                category={cat} 
+                onVideoSelect={setSelectedVideo} 
+              />
+            ))}
+          </>
+        )}
       </div>
 
       {/* Video Player Modal */}
@@ -101,18 +115,18 @@ export default function Music() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 md:p-12"
+            className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 md:p-12"
           >
-            <div className="relative w-full max-w-6xl aspect-video bg-black rounded-3xl overflow-hidden shadow-2xl">
+            <div className="relative w-full max-w-7xl aspect-video bg-black rounded-[40px] overflow-hidden shadow-2xl border-4 border-white/10">
               <button 
                 onClick={() => setSelectedVideo(null)}
-                className="absolute top-6 right-6 z-10 p-4 bg-white/20 hover:bg-white/40 rounded-full text-white transition-colors"
+                className="absolute top-8 right-8 z-10 p-6 bg-white/10 hover:bg-white/20 rounded-full text-white transition-all hover:scale-110 active:scale-95"
               >
-                <X className="w-10 h-10" />
+                <X className="w-12 h-12" />
               </button>
               
               <iframe 
-                src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1`}
+                src={`https://www.youtube.com/embed/${selectedVideo.id}?autoplay=1&rel=0&modestbranding=1`}
                 className="w-full h-full border-none"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
@@ -122,5 +136,102 @@ export default function Music() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function CategorySection({ category, onVideoSelect }: { category: string, onVideoSelect: (v: YouTubeVideo) => void }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const { data: videos, isLoading } = useQuery({
+    queryKey: ['category', category],
+    queryFn: () => getCategoryVideos(category),
+  });
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
+      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+    }
+  };
+
+  if (isLoading) return (
+    <div className="h-80 flex items-center justify-center">
+      <Loader2 className="w-16 h-16 text-orange-200 animate-spin" />
+    </div>
+  );
+
+  return (
+    <section className="space-y-10">
+      <div className="flex items-center justify-between px-4">
+        <h2 className="text-5xl font-bold text-gray-900 tracking-tight">{category}</h2>
+        <div className="flex gap-4">
+          <button 
+            onClick={() => scroll('left')}
+            className="p-4 bg-white border-2 border-orange-100 rounded-full text-orange-500 hover:bg-orange-50 transition-colors shadow-sm active:scale-90"
+          >
+            <ChevronLeft className="w-10 h-10" />
+          </button>
+          <button 
+            onClick={() => scroll('right')}
+            className="p-4 bg-white border-2 border-orange-100 rounded-full text-orange-500 hover:bg-orange-50 transition-colors shadow-sm active:scale-90"
+          >
+            <ChevronRight className="w-10 h-10" />
+          </button>
+        </div>
+      </div>
+      
+      <div 
+        ref={scrollRef}
+        className="flex gap-10 overflow-x-auto pb-10 px-4 scrollbar-hide snap-x snap-mandatory"
+      >
+        {videos?.map((video) => (
+          <VideoCard 
+            key={video.id} 
+            video={video} 
+            onClick={() => onVideoSelect(video)} 
+            className="flex-shrink-0 w-[400px] md:w-[450px] snap-start"
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function VideoCard({ video, onClick, className }: { video: YouTubeVideo, onClick: () => void, className?: string }) {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.03, y: -8 }}
+      whileTap={{ scale: 0.97 }}
+      onClick={onClick}
+      className={cn(
+        "bg-white rounded-[32px] overflow-hidden shadow-xl cursor-pointer transition-all border-2 border-transparent hover:border-orange-200",
+        className
+      )}
+    >
+      <div className="relative aspect-video group">
+        <img 
+          src={video.thumbnail} 
+          alt={video.title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="w-24 h-24 bg-white/90 rounded-full flex items-center justify-center shadow-2xl">
+            <Play className="w-12 h-12 text-orange-600 fill-current ml-1.5" />
+          </div>
+        </div>
+        <div className="absolute bottom-4 right-4 px-4 py-2 bg-black/70 text-white text-xl font-bold rounded-xl backdrop-blur-sm">
+          Listen Now
+        </div>
+      </div>
+      <div className="p-8 space-y-3">
+        <h3 className="text-3xl font-bold text-gray-900 line-clamp-2 leading-tight h-[4.5rem]">
+          {video.title}
+        </h3>
+        <p className="text-2xl text-orange-600 font-semibold tracking-wide uppercase">
+          {video.category}
+        </p>
+      </div>
+    </motion.div>
   );
 }

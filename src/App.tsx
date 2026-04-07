@@ -15,19 +15,25 @@ import { cn } from './lib/utils';
 
 export default function App() {
   const [currentState, setCurrentState] = useState<AppState>('HOME');
+  const [extraData, setExtraData] = useState<any>(null);
+
+  const handleNavigate = (state: AppState, extra?: any) => {
+    setCurrentState(state);
+    setExtraData(extra);
+  };
 
   const renderContent = () => {
     switch (currentState) {
       case 'HOME':
-        return <Home onNavigate={setCurrentState} />;
+        return <Home onNavigate={handleNavigate} />;
       case 'TALK':
-        return <Talk onEnd={() => setCurrentState('HOME')} />;
+        return <Talk onEnd={() => setCurrentState('HOME')} onNavigate={handleNavigate} />;
       case 'MUSIC':
-        return <Music />;
+        return <Music initialQuery={extraData?.query} />;
       case 'GAMES':
-        return <Games />;
+        return <Games initialGameId={extraData?.gameId} />;
       default:
-        return <Home onNavigate={setCurrentState} />;
+        return <Home onNavigate={handleNavigate} />;
     }
   };
 
