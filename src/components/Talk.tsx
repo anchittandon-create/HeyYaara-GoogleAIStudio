@@ -25,13 +25,31 @@ export default function Talk({ onEnd, onNavigate }: TalkProps) {
   const audioQueueRef = useRef<Float32Array[]>([]);
   const isPlayingRef = useRef(false);
 
+  const [needsKey, setNeedsKey] = useState(false);
+
   // Initialize Gemini Live Session
   useEffect(() => {
     const initSession = async () => {
       try {
-        const apiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+        // Check if we have an API key in the environment
+        let apiKey = process.env.GEMINI_API_KEY || (window as any).process?.env?.GEMINI_API_KEY;
+        
+        // If not, check if one has been selected via the AI Studio dialog
         if (!apiKey) {
-          throw new Error("Gemini API key is missing. Please check your environment variables.");
+          const hasKey = await (window as any).aistudio.hasSelectedApiKey();
+          if (!hasKey) {
+            setNeedsKey(true);
+            setState('IDLE');
+            return;
+          }
+          // The key should be available in process.env.API_KEY if selected
+          apiKey = process.env.API_KEY || (window as any).process?.env?.API_KEY;
+        }
+
+        if (!apiKey) {
+          setNeedsKey(true);
+          setState('IDLE');
+          return;
         }
         
         const ai = new GoogleGenAI({ apiKey });
@@ -315,25 +333,56 @@ export default function Talk({ onEnd, onNavigate }: TalkProps) {
           "flex-1 flex flex-col items-center justify-center p-8 transition-all duration-500",
           showTranscript ? "md:w-2/3" : "w-full"
         )}>
-          <VoiceOrb 
-            state={state} 
-            className="w-80 h-80 md:w-96 md:h-96"
-          />
-          <div className="mt-12 text-center space-y-4">
-            <AnimatePresence mode="wait">
-              <motion.p
-                key={state}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="text-4xl font-medium text-white/80"
+          {needsKey ? (
+            <div className="flex flex-col items-center gap-8 text-center max-w-lg">
+              <div className="w-24 h-24 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
+                <MicOff className="w-12 h-12 text-red-500" />
+              </div>
+              <h3 className="text-4xl font-bold">API Key Required</h3>
+              <p className="text-2xl text-white/60 leading-relaxed">
+                Yaara needs an API key to talk. Please select a key from your Google Cloud project.
+              </p>
+              <button 
+                onClick={async () => {
+                  await (window as any).aistudio.openSelectKey();
+                  window.location.reload(); // Reload to pick up the new key
+                }}
+                className="mt-4 px-10 py-5 bg-blue-600 hover:bg-blue-700 rounded-full text-2xl font-bold transition-all hover:scale-105 active:scale-95 shadow-xl"
               >
-                {state === 'LISTENING' ? "Main sun raha hoon..." : 
-                 state === 'SPEAKING' ? "Yaara bol rahi hai..." : 
-                 state === 'PROCESSING' ? "Ek minute..." : "Taiyaar ho raha hoon..."}
-              </motion.p>
-            </AnimatePresence>
-          </div>
+                Setup API Key
+              </button>
+              <a 
+                href="https://ai.google.dev/gemini-api/docs/billing" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-xl text-blue-400 hover:underline mt-4"
+              >
+                Learn about billing
+              </a>
+            </div>
+          ) : (
+            <>
+              <VoiceOrb 
+                state={state} 
+                className="w-80 h-80 md:w-96 md:h-96"
+              />
+              <div className="mt-12 text-center space-y-4">
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={state}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="text-4xl font-medium text-white/80"
+                  >
+                    {state === 'LISTENING' ? "Main sun raha hoon..." : 
+                     state === 'SPEAKING' ? "Yaara bol rahi hai..." : 
+                     state === 'PROCESSING' ? "Ek minute..." : "Taiyaar ho raha hoon..."}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Transcript Panel */}

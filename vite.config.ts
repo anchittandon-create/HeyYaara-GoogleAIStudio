@@ -6,6 +6,11 @@ import {componentTagger} from 'lovable-tagger';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
+  // Capture GEMINI_API_KEY from shell environment or .env file
+  const GEMINI_API_KEY = process.env.GEMINI_API_KEY || env.GEMINI_API_KEY || '';
+  
+  console.log(`[Vite Config] GEMINI_API_KEY is ${GEMINI_API_KEY ? 'SET' : 'NOT SET'}`);
+
   return {
     plugins: [
       react(), 
@@ -13,8 +18,7 @@ export default defineConfig(({mode}) => {
       mode === 'development' && componentTagger()
     ].filter(Boolean),
     define: {
-      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'import.meta.env.VITE_GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      'process.env.GEMINI_API_KEY': JSON.stringify(GEMINI_API_KEY),
     },
     resolve: {
       alias: {
