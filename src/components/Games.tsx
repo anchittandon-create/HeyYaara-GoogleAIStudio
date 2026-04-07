@@ -13,19 +13,33 @@ interface Game {
 }
 
 const GAMES: Game[] = [
+  { id: "ttt", title: "Tic Tac Toe", icon: "❌", color: "bg-purple-500", category: "FUN", description: "Get three in a row to win" },
+  { id: "quiz", title: "Quiz", icon: "❓", color: "bg-orange-500", category: "BRAIN", description: "Test your knowledge" },
   { id: "ludo", title: "Ludo", icon: "🎲", color: "bg-red-500", category: "FUN", description: "Classic board game with friends" },
   { id: "snakes", title: "Snakes & Ladders", icon: "🐍", color: "bg-green-500", category: "FUN", description: "Climb up and watch out for snakes!" },
   { id: "carrom", title: "Carrom", icon: "⚪", color: "bg-amber-700", category: "FUN", description: "Strike the coins into the pockets" },
   { id: "hockey", title: "Hockey", icon: "🏒", color: "bg-blue-500", category: "FUN", description: "Fast-paced air hockey fun" },
-  { id: "ttt", title: "Tic Tac Toe", icon: "❌", color: "bg-purple-500", category: "FUN", description: "Get three in a row to win" },
   { id: "memory", title: "Memory", icon: "🧠", color: "bg-indigo-500", category: "BRAIN", description: "Find the matching pairs" },
-  { id: "quiz", title: "Quiz", icon: "❓", color: "bg-orange-500", category: "BRAIN", description: "Test your knowledge" },
+];
+
+const QUIZ_QUESTIONS = [
+  { q: "Who is known as the Nightingale of India?", options: ["Lata Mangeshkar", "Asha Bhosle", "Sarojini Naidu", "Shreya Ghoshal"], a: 0 },
+  { q: "Which city is known as the Pink City?", options: ["Jaipur", "Jodhpur", "Udaipur", "Bikaner"], a: 0 },
+  { q: "What is the national flower of India?", options: ["Rose", "Lotus", "Lily", "Sunflower"], a: 1 },
+  { q: "Who wrote the Indian National Anthem?", options: ["Rabindranath Tagore", "Bankim Chandra", "Mahatma Gandhi", "Subhash Chandra Bose"], a: 0 },
 ];
 
 export default function Games() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
+  
+  // Tic Tac Toe State
   const [board, setBoard] = useState<(string | null)[]>(Array(9).fill(null));
   const [isXNext, setIsXNext] = useState(true);
+
+  // Quiz State
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [score, setScore] = useState(0);
+  const [showScore, setShowScore] = useState(false);
 
   const calculateWinner = (squares: (string | null)[]) => {
     const lines = [
@@ -56,6 +70,21 @@ export default function Games() {
   const resetGame = () => {
     setBoard(Array(9).fill(null));
     setIsXNext(true);
+    setCurrentQuestion(0);
+    setScore(0);
+    setShowScore(false);
+  };
+
+  const handleAnswerClick = (index: number) => {
+    if (index === QUIZ_QUESTIONS[currentQuestion].a) {
+      setScore(score + 1);
+    }
+    const nextQuestion = currentQuestion + 1;
+    if (nextQuestion < QUIZ_QUESTIONS.length) {
+      setCurrentQuestion(nextQuestion);
+    } else {
+      setShowScore(true);
+    }
   };
 
   return (
@@ -140,6 +169,41 @@ export default function Games() {
                     >
                       Reset Game
                     </button>
+                  </div>
+                ) : selectedGame.id === 'quiz' ? (
+                  <div className="w-full max-w-2xl flex flex-col items-center gap-8">
+                    {showScore ? (
+                      <div className="text-center space-y-6">
+                        <div className="text-6xl font-bold text-gray-900">Score: {score}/{QUIZ_QUESTIONS.length}</div>
+                        <p className="text-2xl text-gray-500">Shabaash! Bahut badhiya khele aap.</p>
+                        <button 
+                          onClick={resetGame}
+                          className={cn("mt-8 px-12 py-6 rounded-full text-white text-3xl font-bold shadow-xl transition-all", selectedGame.color)}
+                        >
+                          Try Again
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="w-full space-y-8">
+                        <div className="text-2xl font-bold text-gray-400 uppercase tracking-widest">
+                          Question {currentQuestion + 1} of {QUIZ_QUESTIONS.length}
+                        </div>
+                        <div className="text-4xl font-bold text-gray-900 leading-tight">
+                          {QUIZ_QUESTIONS[currentQuestion].q}
+                        </div>
+                        <div className="grid grid-cols-1 gap-4">
+                          {QUIZ_QUESTIONS[currentQuestion].options.map((option, i) => (
+                            <button
+                              key={i}
+                              onClick={() => handleAnswerClick(i)}
+                              className="w-full p-6 text-left text-2xl font-semibold bg-white border-4 border-gray-100 rounded-3xl hover:border-orange-500 hover:bg-orange-50 transition-all active:scale-95"
+                            >
+                              {option}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <>
