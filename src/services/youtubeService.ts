@@ -1,9 +1,6 @@
 import { YouTubeVideo } from '../types';
 
-const API_KEY = (import.meta as any).env.VITE_YOUTUBE_API_KEY;
-const BASE_URL = 'https://www.googleapis.com/youtube/v3';
-
-// Fallback curated list if API fails or key is missing
+// Fallback curated list if API fails
 const FALLBACK_VIDEOS: Record<string, YouTubeVideo[]> = {
   "Old Bollywood Songs": [
     { id: "T94PHkuydcw", title: "Lata Mangeshkar Hits - Lag Jaa Gale", thumbnail: "https://img.youtube.com/vi/T94PHkuydcw/0.jpg", category: "Old Bollywood Songs" },
@@ -22,60 +19,23 @@ const FALLBACK_VIDEOS: Record<string, YouTubeVideo[]> = {
 };
 
 export async function searchVideos(query: string): Promise<YouTubeVideo[]> {
-  if (!API_KEY) {
-    console.warn("YouTube API Key missing. Using fallback results.");
-    return FALLBACK_VIDEOS["Old Bollywood Songs"]; // Just a sample
-  }
-
   try {
-    const response = await fetch(
-      `${BASE_URL}/search?part=snippet&maxResults=10&q=${encodeURIComponent(query)}&type=video&key=${API_KEY}`
-    );
-    
-    if (!response.ok) throw new Error('YouTube API request failed');
-    
-    const data = await response.json();
-    return data.items.map((item: any) => ({
-      id: item.id.videoId,
-      title: item.snippet.title,
-      thumbnail: item.snippet.thumbnails.high.url,
-      category: "Search Result"
-    }));
+    const response = await fetch(`/api/youtube/search?q=${encodeURIComponent(query)}`);
+    if (!response.ok) throw new Error('Local API request failed');
+    return await response.json();
   } catch (error) {
-    console.error("Error searching YouTube:", error);
+    console.error("Error searching YouTube via local API:", error);
     return [];
   }
 }
 
 export async function getCategoryVideos(category: string): Promise<YouTubeVideo[]> {
-  const queryMap: Record<string, string> = {
-    "Old Bollywood Songs": "old bollywood songs 60s 70s hits",
-    "Bhajans": "popular hindi bhajans devotional songs",
-    "Punjabi Songs": "classic punjabi folk songs old hits"
-  };
-
-  const query = queryMap[category] || category;
-  
-  if (!API_KEY) {
-    return FALLBACK_VIDEOS[category] || [];
-  }
-
   try {
-    const response = await fetch(
-      `${BASE_URL}/search?part=snippet&maxResults=6&q=${encodeURIComponent(query)}&type=video&key=${API_KEY}`
-    );
-    
-    if (!response.ok) throw new Error('YouTube API request failed');
-    
-    const data = await response.json();
-    return data.items.map((item: any) => ({
-      id: item.id.videoId,
-      title: item.snippet.title,
-      thumbnail: item.snippet.thumbnails.high.url,
-      category: category
-    }));
+    const response = await fetch(`/api/youtube/category?cat=${encodeURIComponent(category)}`);
+    if (!response.ok) throw new Error('Local API request failed');
+    return await response.json();
   } catch (error) {
-    console.error(`Error fetching category ${category}:`, error);
+    console.error(`Error fetching category ${category} via local API:`, error);
     return FALLBACK_VIDEOS[category] || [];
   }
 }

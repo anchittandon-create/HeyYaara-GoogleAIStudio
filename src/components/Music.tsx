@@ -139,7 +139,7 @@ export default function Music({ initialQuery }: { initialQuery?: string }) {
   );
 }
 
-function CategorySection({ category, onVideoSelect }: { category: string, onVideoSelect: (v: YouTubeVideo) => void }) {
+function CategorySection({ category, onVideoSelect }: { category: string, onVideoSelect: (v: YouTubeVideo) => void, key?: string }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { data: videos, isLoading } = useQuery({
     queryKey: ['category', category],
@@ -197,7 +197,7 @@ function CategorySection({ category, onVideoSelect }: { category: string, onVide
   );
 }
 
-function VideoCard({ video, onClick, className }: { video: YouTubeVideo, onClick: () => void, className?: string }) {
+function VideoCard({ video, onClick, className }: { video: YouTubeVideo, onClick: () => void, className?: string, key?: string }) {
   return (
     <motion.div
       whileHover={{ scale: 1.03, y: -8 }}
