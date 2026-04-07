@@ -31,27 +31,47 @@ export default function Talk({ onEnd, onNavigate }: TalkProps) {
   useEffect(() => {
     const initSession = async () => {
       try {
-        // Check if we have an API key in the environment
-        let apiKey = process.env.GEMINI_API_KEY || (window as any).process?.env?.GEMINI_API_KEY;
-        
-        // If not, check if one has been selected via the AI Studio dialog
-        if (!apiKey) {
-          const hasKey = await (window as any).aistudio.hasSelectedApiKey();
-          if (!hasKey) {
-            setNeedsKey(true);
-            setState('IDLE');
-            return;
-          }
-          // The key should be available in process.env.API_KEY if selected
-          apiKey = process.env.API_KEY || (window as any).process?.env?.API_KEY;
-        }
+        // Robust API key retrieval
+        const getApiKey = async () => {
+          // 1. Try process.env.GEMINI_API_KEY (Vite defined)
+          let key = process.env.GEMINI_API_KEY;
+          if (key && key !== 'undefined' && key !== 'null' && key !== 'process.env.GEMINI_API_KEY') return key;
 
+          // 2. Try window.process.env.GEMINI_API_KEY
+          key = (window as any).process?.env?.GEMINI_API_KEY;
+          if (key && key !== 'undefined' && key !== 'null') return key;
+
+          // 3. Try import.meta.env.VITE_GEMINI_API_KEY
+          key = (import.meta as any).env?.VITE_GEMINI_API_KEY;
+          if (key && key !== 'undefined' && key !== 'null') return key;
+
+          // 4. Check if a key has been selected via AI Studio dialog
+          if ((window as any).aistudio?.hasSelectedApiKey) {
+            const hasKey = await (window as any).aistudio.hasSelectedApiKey();
+            if (hasKey) {
+              // Try process.env.API_KEY
+              key = process.env.API_KEY;
+              if (key && key !== 'undefined' && key !== 'null' && key !== 'process.env.API_KEY') return key;
+              
+              // Try window.process.env.API_KEY
+              key = (window as any).process?.env?.API_KEY;
+              if (key && key !== 'undefined' && key !== 'null') return key;
+            }
+          }
+
+          return null;
+        };
+
+        const apiKey = await getApiKey();
+        
         if (!apiKey) {
+          console.log("No valid Gemini API key found, showing setup UI");
           setNeedsKey(true);
           setState('IDLE');
           return;
         }
-        
+
+        console.log("Initializing Gemini Live with API Key");
         const ai = new GoogleGenAI({ apiKey });
         
         const session = await ai.live.connect({
