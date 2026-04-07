@@ -40,7 +40,7 @@ export default function Music({ initialQuery }: { initialQuery?: string }) {
     <div className="flex flex-col h-full bg-[#FFF9F5] overflow-y-auto">
       {/* Header & Search */}
       <div className="p-8 md:p-12 bg-white shadow-md sticky top-0 z-20 space-y-8">
-        <div className="flex items-center gap-6 pl-20 md:pl-24">
+        <div className="flex items-center gap-6 pl-24 md:pl-32">
           <div className="p-5 bg-orange-500 rounded-3xl text-white shadow-lg">
             <MusicIcon className="w-12 h-12" />
           </div>

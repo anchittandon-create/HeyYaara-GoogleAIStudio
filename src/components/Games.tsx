@@ -8,11 +8,17 @@ const GAMES: Game[] = [
   // Fun Games
   { id: "ttt", title: "Tic Tac Toe", icon: "❌", color: "bg-purple-500", category: "FUN", description: "Three in a row", isLocal: true },
   { id: "snake", title: "Snake", icon: "🐍", color: "bg-green-500", category: "FUN", description: "Eat and grow", isLocal: true },
+  { id: "mole", title: "Whack-a-Mole", icon: "🔨", color: "bg-yellow-600", category: "FUN", description: "Tap the mole!", isLocal: true },
+  { id: "coloring", title: "Coloring", icon: "🎨", color: "bg-pink-500", category: "FUN", description: "Paint and relax", isLocal: true },
   { id: "pacman", title: "Pacman", icon: "🟡", color: "bg-yellow-500", category: "FUN", description: "Eat the dots", url: "https://www.google.com/logos/2010/pacman10-i.html" },
   
   // Brain Games
   { id: "memory", title: "Memory Game", icon: "🧠", color: "bg-indigo-500", category: "BRAIN", description: "Match the pairs", isLocal: true },
+  { id: "simon", title: "Simon Says", icon: "🔴", color: "bg-red-500", category: "BRAIN", description: "Follow the pattern", isLocal: true },
+  { id: "wordsearch", title: "Word Search", icon: "🔤", color: "bg-teal-500", category: "BRAIN", description: "Find the words", isLocal: true },
   { id: "sudoku", title: "Sudoku", icon: "🔢", color: "bg-orange-500", category: "BRAIN", description: "Number puzzle", isLocal: true },
+  { id: "solitaire", title: "Solitaire", icon: "🃏", color: "bg-blue-600", category: "BRAIN", description: "Classic card game", url: "https://www.google.com/logos/fnbx/solitaire/solitaire.html" },
+  { id: "minesweeper", title: "Minesweeper", icon: "💣", color: "bg-gray-600", category: "BRAIN", description: "Clear the field", url: "https://www.google.com/logos/fnbx/minesweeper/minesweeper.html" },
 ];
 
 export default function Games({ initialGameId }: { initialGameId?: string }) {
@@ -30,7 +36,7 @@ export default function Games({ initialGameId }: { initialGameId?: string }) {
     <div className="flex flex-col h-full bg-[#F5F9FF] overflow-hidden">
       {/* Header - Compact */}
       <div className="px-8 py-4 md:py-6 bg-white border-b-2 border-blue-50 flex items-center justify-between z-10 shadow-sm">
-        <div className="flex items-center gap-4 pl-20 md:pl-24">
+        <div className="flex items-center gap-4 pl-24 md:pl-32">
           <div className="p-3 bg-green-500 rounded-2xl text-white">
             <Gamepad2 className="w-8 h-8" />
           </div>
@@ -88,6 +94,10 @@ export default function Games({ initialGameId }: { initialGameId?: string }) {
                     {selectedGame.id === 'memory' && <MemoryGame />}
                     {selectedGame.id === 'snake' && <SnakeGame />}
                     {selectedGame.id === 'sudoku' && <SudokuGame />}
+                    {selectedGame.id === 'mole' && <WhackAMole />}
+                    {selectedGame.id === 'simon' && <SimonSays />}
+                    {selectedGame.id === 'wordsearch' && <WordSearch />}
+                    {selectedGame.id === 'coloring' && <ColoringBook />}
                   </div>
                 ) : (
                   <iframe 
@@ -430,6 +440,358 @@ function SudokuGame() {
         className="px-10 py-5 bg-gray-200 text-gray-700 text-2xl font-bold rounded-full active:scale-95"
       >
         Reset
+      </button>
+    </div>
+  );
+}
+
+function WhackAMole() {
+  const [score, setScore] = useState(0);
+  const [activeMole, setActiveMole] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [isGameOver, setIsGameOver] = useState(false);
+
+  useEffect(() => {
+    if (timeLeft > 0 && !isGameOver) {
+      const timer = setInterval(() => setTimeLeft(t => t - 1), 1000);
+      return () => clearInterval(timer);
+    } else if (timeLeft === 0) {
+      setIsGameOver(true);
+    }
+  }, [timeLeft, isGameOver]);
+
+  useEffect(() => {
+    if (!isGameOver) {
+      const moleTimer = setInterval(() => {
+        setActiveMole(Math.floor(Math.random() * 9));
+      }, 1000);
+      return () => clearInterval(moleTimer);
+    }
+  }, [isGameOver]);
+
+  const handleWhack = (index: number) => {
+    if (index === activeMole) {
+      setScore(s => s + 1);
+      setActiveMole(null);
+    }
+  };
+
+  const reset = () => {
+    setScore(0);
+    setTimeLeft(30);
+    setIsGameOver(false);
+    setActiveMole(null);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-8 max-w-full">
+      <div className="flex justify-between w-full max-w-md px-4">
+        <div className="text-3xl font-bold text-gray-800">Score: {score}</div>
+        <div className="text-3xl font-bold text-red-500">Time: {timeLeft}s</div>
+      </div>
+      
+      <div className="grid grid-cols-3 gap-4 bg-amber-800 p-6 rounded-3xl shadow-2xl">
+        {Array(9).fill(null).map((_, i) => (
+          <button
+            key={i}
+            onClick={() => handleWhack(i)}
+            className="w-24 h-24 md:w-32 md:h-32 bg-amber-950 rounded-full relative overflow-hidden flex items-center justify-center border-4 border-amber-900"
+          >
+            <AnimatePresence>
+              {activeMole === i && (
+                <motion.div
+                  initial={{ y: 100 }}
+                  animate={{ y: 0 }}
+                  exit={{ y: 100 }}
+                  className="text-6xl md:text-7xl"
+                >
+                  🐹
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </button>
+        ))}
+      </div>
+
+      {isGameOver && (
+        <div className="text-center space-y-4">
+          <div className="text-4xl font-bold text-gray-800">Game Over! Final Score: {score}</div>
+          <button 
+            onClick={reset}
+            className="px-10 py-5 bg-yellow-600 text-white text-2xl font-bold rounded-full shadow-xl active:scale-95"
+          >
+            Play Again
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function SimonSays() {
+  const [sequence, setSequence] = useState<number[]>([]);
+  const [userSequence, setUserSequence] = useState<number[]>([]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [activeButton, setActiveButton] = useState<number | null>(null);
+  const [score, setScore] = useState(0);
+  const [isGameOver, setIsGameOver] = useState(false);
+
+  const colors = [
+    { id: 0, color: 'bg-red-500', active: 'bg-red-300' },
+    { id: 1, color: 'bg-blue-500', active: 'bg-blue-300' },
+    { id: 2, color: 'bg-green-500', active: 'bg-green-300' },
+    { id: 3, color: 'bg-yellow-500', active: 'bg-yellow-300' },
+  ];
+
+  const startNextLevel = () => {
+    const nextColor = Math.floor(Math.random() * 4);
+    const newSequence = [...sequence, nextColor];
+    setSequence(newSequence);
+    setUserSequence([]);
+    playSequence(newSequence);
+  };
+
+  const playSequence = async (seq: number[]) => {
+    setIsPlaying(true);
+    for (let i = 0; i < seq.length; i++) {
+      await new Promise(r => setTimeout(r, 600));
+      setActiveButton(seq[i]);
+      await new Promise(r => setTimeout(r, 400));
+      setActiveButton(null);
+    }
+    setIsPlaying(false);
+  };
+
+  const handleButtonClick = (id: number) => {
+    if (isPlaying || isGameOver) return;
+    
+    setActiveButton(id);
+    setTimeout(() => setActiveButton(null), 200);
+
+    const newUserSequence = [...userSequence, id];
+    setUserSequence(newUserSequence);
+
+    if (id !== sequence[newUserSequence.length - 1]) {
+      setIsGameOver(true);
+      return;
+    }
+
+    if (newUserSequence.length === sequence.length) {
+      setScore(s => s + 1);
+      setTimeout(startNextLevel, 1000);
+    }
+  };
+
+  const reset = () => {
+    setSequence([]);
+    setUserSequence([]);
+    setScore(0);
+    setIsGameOver(false);
+    setTimeout(startNextLevel, 500);
+  };
+
+  useEffect(() => {
+    reset();
+  }, []);
+
+  return (
+    <div className="flex flex-col items-center gap-8 max-w-full">
+      <div className="text-3xl font-bold text-gray-800">Score: {score}</div>
+      
+      <div className="grid grid-cols-2 gap-4 p-4 bg-gray-800 rounded-full shadow-2xl">
+        {colors.map((c) => (
+          <button
+            key={c.id}
+            onClick={() => handleButtonClick(c.id)}
+            className={cn(
+              "w-32 h-32 md:w-40 md:h-40 rounded-full transition-all duration-200 shadow-lg active:scale-95",
+              activeButton === c.id ? c.active : c.color,
+              isPlaying ? "cursor-default" : "cursor-pointer"
+            )}
+          />
+        ))}
+      </div>
+
+      {isGameOver && (
+        <div className="text-center space-y-4">
+          <div className="text-4xl font-bold text-red-500">Game Over!</div>
+          <button 
+            onClick={reset}
+            className="px-10 py-5 bg-red-500 text-white text-2xl font-bold rounded-full shadow-xl active:scale-95"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
+      
+      {!isGameOver && isPlaying && (
+        <div className="text-2xl font-medium text-gray-500 animate-pulse">Yaara is showing...</div>
+      )}
+      {!isGameOver && !isPlaying && (
+        <div className="text-2xl font-medium text-green-600">Your turn!</div>
+      )}
+    </div>
+  );
+}
+
+function WordSearch() {
+  const words = ['YAARA', 'HAPPY', 'MUSIC', 'GAMES', 'LOVE', 'PEACE'];
+  const size = 8;
+  const [grid, setGrid] = useState<string[][]>([]);
+  const [foundWords, setFoundWords] = useState<string[]>([]);
+  const [selection, setSelection] = useState<[number, number][]>([]);
+
+  const initGame = () => {
+    const newGrid = Array(size).fill(null).map(() => Array(size).fill(''));
+    
+    // Place words
+    words.forEach(word => {
+      let placed = false;
+      while (!placed) {
+        const isHorizontal = Math.random() > 0.5;
+        const row = Math.floor(Math.random() * (isHorizontal ? size : size - word.length + 1));
+        const col = Math.floor(Math.random() * (isHorizontal ? size - word.length + 1 : size));
+        
+        let canPlace = true;
+        for (let i = 0; i < word.length; i++) {
+          const r = isHorizontal ? row : row + i;
+          const c = isHorizontal ? col + i : col;
+          if (newGrid[r][c] !== '' && newGrid[r][c] !== word[i]) {
+            canPlace = false;
+            break;
+          }
+        }
+
+        if (canPlace) {
+          for (let i = 0; i < word.length; i++) {
+            const r = isHorizontal ? row : row + i;
+            const c = isHorizontal ? col + i : col;
+            newGrid[r][c] = word[i];
+          }
+          placed = true;
+        }
+      }
+    });
+
+    // Fill empty
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    for (let r = 0; r < size; r++) {
+      for (let c = 0; c < size; c++) {
+        if (newGrid[r][c] === '') {
+          newGrid[r][c] = letters[Math.floor(Math.random() * letters.length)];
+        }
+      }
+    }
+    setGrid(newGrid);
+    setFoundWords([]);
+    setSelection([]);
+  };
+
+  useEffect(() => {
+    initGame();
+  }, []);
+
+  const handleCellClick = (r: number, c: number) => {
+    const newSelection = [...selection, [r, c] as [number, number]];
+    setSelection(newSelection);
+
+    const selectedWord = newSelection.map(([row, col]) => grid[row][col]).join('');
+    if (words.includes(selectedWord) && !foundWords.includes(selectedWord)) {
+      setFoundWords([...foundWords, selectedWord]);
+      setSelection([]);
+    } else if (selectedWord.length > 6) {
+      setSelection([]);
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-8 max-w-full">
+      <div className="text-3xl font-bold text-gray-800">Found: {foundWords.length} / {words.length}</div>
+      
+      <div className="grid grid-cols-8 gap-1 bg-gray-200 p-2 rounded-xl shadow-lg">
+        {grid.map((row, r) => row.map((letter, c) => (
+          <button
+            key={`${r}-${c}`}
+            onClick={() => handleCellClick(r, c)}
+            className={cn(
+              "w-10 h-10 md:w-12 md:h-12 flex items-center justify-center text-xl md:text-2xl font-bold rounded-lg transition-all",
+              selection.some(([sr, sc]) => sr === r && sc === c) ? "bg-teal-500 text-white" : "bg-white text-gray-900"
+            )}
+          >
+            {letter}
+          </button>
+        )))}
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-3">
+        {words.map(word => (
+          <span 
+            key={word}
+            className={cn(
+              "px-4 py-2 rounded-full text-xl font-bold",
+              foundWords.includes(word) ? "bg-green-100 text-green-600 line-through" : "bg-gray-100 text-gray-400"
+            )}
+          >
+            {word}
+          </span>
+        ))}
+      </div>
+
+      <button 
+        onClick={initGame}
+        className="px-10 py-5 bg-teal-500 text-white text-2xl font-bold rounded-full shadow-xl active:scale-95"
+      >
+        New Puzzle
+      </button>
+    </div>
+  );
+}
+
+function ColoringBook() {
+  const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF', '#FFA500', '#800080', '#000000', '#FFFFFF'];
+  const [selectedColor, setSelectedColor] = useState(colors[0]);
+  const [pixels, setPixels] = useState<string[]>(Array(100).fill('#FFFFFF'));
+
+  const handlePixelClick = (index: number) => {
+    const newPixels = [...pixels];
+    newPixels[index] = selectedColor;
+    setPixels(newPixels);
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-8 max-w-full">
+      <div className="text-3xl font-bold text-gray-800">Coloring Fun</div>
+      
+      <div className="grid grid-cols-10 gap-0.5 bg-gray-200 p-1 rounded-xl shadow-2xl">
+        {pixels.map((color, i) => (
+          <button
+            key={i}
+            onClick={() => handlePixelClick(i)}
+            className="w-8 h-8 md:w-12 md:h-12 border border-gray-100"
+            style={{ backgroundColor: color }}
+          />
+        ))}
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-3">
+        {colors.map(color => (
+          <button
+            key={color}
+            onClick={() => setSelectedColor(color)}
+            className={cn(
+              "w-12 h-12 md:w-16 md:h-16 rounded-full border-4 transition-all active:scale-90 shadow-md",
+              selectedColor === color ? "border-gray-900 scale-110" : "border-transparent"
+            )}
+            style={{ backgroundColor: color }}
+          />
+        ))}
+      </div>
+
+      <button 
+        onClick={() => setPixels(Array(100).fill('#FFFFFF'))}
+        className="px-10 py-5 bg-pink-500 text-white text-2xl font-bold rounded-full shadow-xl active:scale-95"
+      >
+        Clear All
       </button>
     </div>
   );

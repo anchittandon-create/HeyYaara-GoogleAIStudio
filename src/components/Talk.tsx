@@ -79,7 +79,7 @@ export default function Talk({ onEnd, onNavigate }: TalkProps) {
                       properties: {
                         gameId: {
                           type: Type.STRING,
-                          enum: ["ludo", "snakes", "carrom", "hockey", "ttt", "bubble", "memory", "quiz"],
+                          enum: ["ttt", "snake", "mole", "pacman", "memory", "simon", "sudoku", "solitaire", "minesweeper", "wordsearch", "coloring"],
                           description: "The ID of the game to open."
                         }
                       },
